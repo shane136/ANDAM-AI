@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Light Theme Colors */
+  --light-bg-page: #eeeeee;
+  --light-bg-sub: #efefef;
+  --light-bg-bar: #f1f1f1;
+  --light-bg-element: #f3f3f3;
+  --light-bg-muted: #f4f4f4;
+  --light-bg-subcard: #f6f6f6;
+  --light-bg-card: #f8f8f8;
+  --light-bg-chip: #f9f9f9;
+  --light-bg-highlight: #fbfbfb;
+  --light-bg-surface: #fdfdfd;
+  --light-bg-white: #ffffff;
+  
+  --light-text-primary: #1e1e1e;
+  --light-text-secondary: #3e3e42;
+  --light-text-muted: #6e6e73;
+  --light-border: #dcdcdc;
+  --light-border-subtle: #e5e5e5;
+
+  /* Dark Theme Colors */
+  --dark-bg-page: #1e1e1e;
+  --dark-bg-card: #252526;
+  --dark-bg-subcard: #2d2d30;
+  --dark-border: #3e3e42;
+  --dark-accent: #007acc;
+  --dark-text-primary: #ffffff;
+  --dark-text-secondary: #cccccc;
+  --dark-text-muted: #a0a0a5;
+}
+
+body {
+  background-color: var(--light-bg-page);
+  color: var(--light-text-primary);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body {
+  background-color: var(--dark-bg-page);
+  color: var(--dark-text-primary);
+}
+
+/* Scrollbar customization */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dcdcdc;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3e3e42;
+}
+
+/* Print Styles */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .print-preview-document,
+  .print-preview-document * {
+    visibility: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .print-preview-document {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 24px !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

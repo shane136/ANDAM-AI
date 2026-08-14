@@ -1,0 +1,6 @@
+{
+  "name": "ANDAM AI",
+  "description": "AI-powered Disaster Risk Reduction and Management (DRRM) assistant for Iligan City, Lanao del Norte, Philippines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
