@@ -14,7 +14,7 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
 
   const categories = [
     { id: 'all', label: { ceb: 'Tanan nga Hotlines', fil: 'Lahat ng Hotlines', en: 'All Hotlines' } },
-    { id: 'rescue', label: { ceb: 'CDRRMO / Rescue', fil: 'CDRRMO / Rescue', en: 'CDRRMO Rescue' } },
+    { id: 'rescue', label: { ceb: 'ICDRRMD / Rescue', fil: 'ICDRRMD / Rescue', en: 'ICDRRMD Rescue' } },
     { id: 'police', label: { ceb: 'Pulis (PNP)', fil: 'Pulisya (PNP)', en: 'Police (PNP)' } },
     { id: 'fire', label: { ceb: 'BFP Fire Station', fil: 'BFP Fire Station', en: 'Fire Dept (BFP)' } },
     { id: 'medical', label: { ceb: 'Ospital ug Red Cross', fil: 'Ospital at Red Cross', en: 'Hospitals & Medical' } },
@@ -133,69 +133,81 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
       </div>
 
       {/* Hotlines Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
         {filteredHotlines.map((hotline) => (
           <div
             key={hotline.id}
-            className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-5 hover:border-blue-500/60 transition duration-200 flex flex-col justify-between space-y-4 shadow-xs"
+            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 hover:border-blue-500/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between shadow-xs"
           >
+            {/* Top Information Section - Fixed & Aligned Heights */}
             <div>
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full border border-blue-100 dark:border-blue-900/40 font-semibold">
-                    {hotline.agency}
-                  </span>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white mt-2.5">{hotline.name}</h3>
-                </div>
+              {/* Agency & Availability Badges */}
+              <div className="flex items-center justify-between gap-2 min-h-[26px]">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-1 rounded-full border border-blue-100 dark:border-blue-900/40 font-semibold truncate max-w-[210px]">
+                  {hotline.agency}
+                </span>
                 {hotline.isAvailable247 && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-900/40 font-semibold">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-900/40 font-semibold shrink-0">
                     <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> 24/7
                   </span>
                 )}
               </div>
 
-              {hotline.description && (
-                <p className="text-xs text-slate-600 dark:text-slate-400 mt-2.5 leading-relaxed">{hotline.description}</p>
-              )}
+              {/* Agency Name */}
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mt-2.5 min-h-[48px] flex items-start line-clamp-2 leading-snug">
+                {hotline.name}
+              </h3>
 
-              {hotline.address && (
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2.5 font-sans">
-                  <MapPin className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                  <span className="truncate">{hotline.address}</span>
-                </div>
-              )}
+              {/* Description */}
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 min-h-[52px] line-clamp-3 leading-relaxed">
+                {hotline.description || 'Emergency assistance, rescue operations, and public disaster coordination.'}
+              </p>
+
+              {/* Address / Location */}
+              <div className="min-h-[38px] flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 font-sans">
+                <MapPin className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                <span className="truncate" title={hotline.address || 'Iligan City'}>
+                  {hotline.address || 'Iligan City'}
+                </span>
+              </div>
             </div>
 
-            {/* Phone Numbers List */}
-            <div className="bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-2">
-              <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-semibold">
-                Official Contact Numbers:
-              </span>
-              <div className="flex flex-wrap gap-2">
+            {/* Official Contact Numbers Section - Aligned Baseline */}
+            <div className="bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-800 mt-4 space-y-2">
+              <div className="flex items-center justify-between pb-1 border-b border-slate-200/60 dark:border-slate-800/60">
+                <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 uppercase tracking-widest font-bold">
+                  Official Contact Numbers:
+                </span>
+              </div>
+
+              <div className="h-[140px] overflow-y-auto space-y-1.5 pr-0.5">
                 {hotline.numbers.map((num, nIdx) => (
                   <div
                     key={nIdx}
-                    className="flex items-center gap-2 bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs font-mono font-bold shadow-2xs"
+                    className="flex items-center justify-between gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs font-mono font-bold shadow-2xs hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
                   >
-                    <span>{num}</span>
-                    <a
-                      href={`tel:${num.replace(/[^0-9+]/g, '')}`}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-white transition p-1 hover:bg-blue-50 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
-                      title="Call directly"
-                    >
-                      <PhoneCall className="w-3.5 h-3.5" />
-                    </a>
-                    <button
-                      onClick={() => handleCopy(num)}
-                      className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
-                      title="Copy number"
-                    >
-                      {copiedNumber === num ? (
-                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                      ) : (
-                        <Copy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
+                    <span className="text-blue-600 dark:text-blue-400 tracking-wide">{num}</span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <a
+                        href={`tel:${num.replace(/[^0-9+]/g, '')}`}
+                        className="text-blue-600 dark:text-blue-400 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-600 transition p-1.5 rounded-lg cursor-pointer flex items-center gap-1 text-[11px] font-sans"
+                        title={`Call ${num}`}
+                      >
+                        <PhoneCall className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline text-[10px] font-semibold uppercase">Call</span>
+                      </a>
+                      <button
+                        onClick={() => handleCopy(num)}
+                        className="text-slate-400 hover:text-slate-700 dark:hover:text-white transition p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+                        title="Copy number"
+                      >
+                        {copiedNumber === num ? (
+                          <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
