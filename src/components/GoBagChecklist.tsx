@@ -319,28 +319,28 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
             </div>
 
             {/* DOCUMENT PREVIEW CANVAS (Targeted by @media print as .print-preview-document) */}
-            <div className="print-preview-document bg-white text-slate-900 border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-inner space-y-6 max-h-[60vh] overflow-y-auto">
+            <div className="print-preview-document bg-white text-slate-900 border border-slate-200 p-6 sm:p-7 rounded-2xl shadow-inner space-y-4 max-h-[60vh] overflow-y-auto print:max-h-none print:overflow-visible print:border-none print:p-0 print:space-y-4">
               {/* Document Official Header */}
-              <div className="border-b-2 border-slate-900 pb-4 flex items-start justify-between gap-4">
+              <div className="border-b-2 border-slate-900 pb-3 flex items-start justify-between gap-4">
                 <div>
-                  <h1 className="text-xs font-mono tracking-widest font-bold uppercase text-slate-600">
+                  <h1 className="text-[11px] font-mono tracking-wider font-bold uppercase text-slate-700">
                     ILIGAN CITY DISASTER RISK REDUCTION & MANAGEMENT DEPARTMENT (ICDRRMD)
                   </h1>
                   <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
                     FAMILY EMERGENCY GO-BAG CHECKLIST
                   </h2>
-                  <p className="text-xs text-slate-600 mt-1">
+                  <p className="text-xs text-slate-600 mt-0.5">
                     Official 72-Hour Survival Kit Directory • Prepared for Iligan City Household
                   </p>
                 </div>
-                <div className="text-right text-[11px] text-slate-500 font-mono">
+                <div className="text-right text-[11px] text-slate-600 font-mono shrink-0">
                   <div>Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
-                  <div className="font-bold text-slate-800 mt-0.5">Readiness: {checkedItems}/{totalItems} Packed ({percentage}%)</div>
+                  <div className="font-bold text-slate-900 mt-0.5">Readiness: {checkedItems}/{totalItems} Packed ({percentage}%)</div>
                 </div>
               </div>
 
               {/* Selected Filter Notice */}
-              <div className="bg-slate-100 border border-slate-300 p-3 rounded-xl text-xs font-medium text-slate-800 flex items-center justify-between">
+              <div className="bg-slate-100 border border-slate-300 px-3.5 py-2 rounded-xl text-xs font-medium text-slate-800 flex items-center justify-between print:bg-slate-50">
                 <span>
                   <strong>Selected View:</strong> Verified Packed Items Only • Category: {CATEGORY_LABELS[printCategory]?.[language] || printCategory}
                 </span>
@@ -359,7 +359,7 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
                 ) : (
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="border-b border-slate-300 text-[11px] font-mono text-slate-600 uppercase">
+                      <tr className="border-b border-slate-300 text-[11px] font-mono text-slate-700 uppercase">
                         <th className="py-2 px-2 w-14 text-center">Status</th>
                         <th className="py-2 px-2">Item Title</th>
                         <th className="py-2 px-2 w-32">Category</th>
@@ -369,15 +369,15 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
                     <tbody className="divide-y divide-slate-200 text-xs">
                       {previewItems.map((item) => (
                         <tr key={item.id} className="align-top hover:bg-slate-50/80 transition-colors">
-                          <td className="py-2.5 px-2 text-center">
-                            <div className="flex items-center justify-center pt-0.5">
-                              {/* Static Check Mark Only - Read-Only, No Checkbox Box, No Toggle */}
-                              <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center print:border print:border-slate-800 print:bg-slate-100 print:text-black shadow-2xs">
+                          <td className="py-2 px-2 text-center">
+                            <div className="flex items-center justify-center">
+                              {/* Static Check Mark */}
+                              <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center print:border print:border-emerald-700 print:bg-emerald-50 print:text-emerald-700 shadow-2xs">
                                 <Check className="w-3.5 h-3.5 stroke-[3]" />
                               </div>
                             </div>
                           </td>
-                          <td className="py-2.5 px-2 font-semibold text-slate-900">
+                          <td className="py-2 px-2 font-semibold text-slate-900">
                             {item.title[language]}
                             {item.isEssential && (
                               <span className="ml-2 text-[9px] font-mono font-bold uppercase text-red-700 bg-red-100 px-1.5 py-0.5 rounded border border-red-300">
@@ -385,10 +385,10 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
                               </span>
                             )}
                           </td>
-                          <td className="py-2.5 px-2 text-[11px] text-slate-600 font-mono">
+                          <td className="py-2 px-2 text-[11px] text-slate-600 font-mono">
                             {CATEGORY_LABELS[item.category]?.[language] || item.category}
                           </td>
-                          <td className="py-2.5 px-2 text-slate-600 text-[11px] leading-relaxed">
+                          <td className="py-2 px-2 text-slate-600 text-[11px] leading-relaxed">
                             {item.description?.[language] || '—'}
                           </td>
                         </tr>
@@ -399,7 +399,7 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
               </div>
 
               {/* Document Footer Notes */}
-              <div className="border-t border-slate-300 pt-4 text-[11px] text-slate-600 space-y-1">
+              <div className="border-t border-slate-300 pt-3 text-[11px] text-slate-600 space-y-1">
                 <div className="font-bold text-slate-900 flex items-center gap-1.5">
                   <ShieldAlert className="w-3.5 h-3.5 text-blue-600" />
                   <span>Iligan City Disaster Risk Reduction and Management Department Emergency Contacts:</span>
@@ -407,7 +407,7 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
                 <p>
                   ICDRRMD 24/7 Communication Center: <strong>(063) 221-8459</strong> | <strong>0997-726-2692</strong> (Globe) | <strong>0969-233-7878</strong> (Smart)
                 </p>
-                <p className="text-[10px] text-slate-500 italic mt-1">
+                <p className="text-[10px] text-slate-500 italic mt-0.5">
                   Keep your Go-Bag stored near your main exit door. Inspect food, water, and prescription medicines every 6 months.
                 </p>
               </div>
