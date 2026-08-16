@@ -2,7 +2,6 @@ import express from "express";
 import path from "path";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
-import { createServer as createViteServer } from "vite";
 import { ILIGAN_DRRM_SYSTEM_INSTRUCTION } from "./src/constants/systemInstruction";
 import { fetchIliganRealtimeWeather } from "./src/services/weatherService";
 import { ILIGAN_BARANGAYS, OFFICIAL_HOTLINES, HAZARD_GUIDES, GO_BAG_ITEMS } from "./src/constants/iliganData";
@@ -10,7 +9,7 @@ import { ILIGAN_BARANGAYS, OFFICIAL_HOTLINES, HAZARD_GUIDES, GO_BAG_ITEMS } from
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 
@@ -162,6 +161,10 @@ app.post("/api/chat", async (req, res) => {
   }
 
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not configured; using local DRRM fallback.");
+    }
+
     const ai = getGeminiClient();
 
     // Prepare contents array for Gemini API
@@ -236,6 +239,7 @@ Data Source: ${weatherData.source}
 // Start Server with Vite Middleware in Dev or Static files in Production
 async function start() {
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -254,5 +258,13 @@ async function start() {
   });
 }
 
-start();
+// Vercel imports this Express app from the root-level api entrypoints. Starting
+// a listener there would keep the serverless invocation from completing.
+if (!process.env.VERCEL) {
+  start().catch((error) => {
+    console.error("Failed to start ANDAM AI server:", error);
+    process.exitCode = 1;
+  });
+}
 
+export default app;
