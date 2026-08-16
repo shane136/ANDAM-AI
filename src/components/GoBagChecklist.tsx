@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, CheckCircle2, Circle, Plus, Trash2, Printer, Eye, X, Filter, Check, ShieldAlert, FileText } from 'lucide-react';
+import { ShoppingBag, CheckCircle2, Circle, Plus, Trash2, Printer, Eye, X, Check, ShieldAlert, FileText } from 'lucide-react';
 import { GO_BAG_ITEMS } from '../constants/iliganData';
 import { Language, GoBagItem } from '../types';
 
 interface GoBagChecklistProps {
   language: Language;
 }
-
-type StatusFilter = 'all' | 'packed' | 'unpacked';
 
 const CATEGORY_LABELS: Record<string, { ceb: string; fil: string; en: string }> = {
   all: { ceb: 'Tanan nga Kategoriya', fil: 'Lahat ng Kategorya', en: 'All Categories' },
@@ -17,12 +15,6 @@ const CATEGORY_LABELS: Record<string, { ceb: string; fil: string; en: string }> 
   documents_cash: { ceb: 'Dokumento ug Kuwarta', fil: 'Dokumento at Cash', en: 'Documents & Cash' },
   sanitation: { ceb: 'Kalimpyo ug Sapot', fil: 'Kalinisan at Damit', en: 'Sanitation & Clothing' },
   special_needs: { ceb: 'Special Needs / Custom', fil: 'Special Needs / Custom', en: 'Special Needs & Custom' },
-};
-
-const STATUS_FILTER_LABELS: Record<StatusFilter, { ceb: string; fil: string; en: string }> = {
-  all: { ceb: 'Tanan nga Items', fil: 'Lahat ng Items', en: 'All Items' },
-  packed: { ceb: 'Andam / Na-pack Na', fil: 'Nai-impake Na', en: 'Packed Items Only' },
-  unpacked: { ceb: 'Kailangan Pa / Kulang', fil: 'Kailangan Pa', en: 'Needed / Unpacked Only' },
 };
 
 export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
@@ -41,7 +33,6 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
   const [newItemText, setNewItemText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showPrintPreview, setShowPrintPreview] = useState<boolean>(false);
-  const [printStatusFilter, setPrintStatusFilter] = useState<StatusFilter>('all');
   const [printCategory, setPrintCategory] = useState<string>('all');
 
   useEffect(() => {
@@ -81,7 +72,6 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
 
   const openPrintPreview = () => {
     setPrintCategory(selectedCategory);
-    setPrintStatusFilter('all');
     setShowPrintPreview(true);
   };
 
@@ -89,11 +79,10 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
     (i) => selectedCategory === 'all' || i.category === selectedCategory
   );
 
+  // ONLY checked items are shown in print preview
   const previewItems = items.filter((item) => {
-    const matchesCat = printCategory === 'all' || item.category === printCategory;
-    if (!matchesCat) return false;
-    if (printStatusFilter === 'packed') return item.checked;
-    if (printStatusFilter === 'unpacked') return !item.checked;
+    if (!item.checked) return false;
+    if (printCategory !== 'all' && item.category !== printCategory) return false;
     return true;
   });
 
@@ -273,19 +262,18 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
 
               {/* Filter Controls Bar inside Preview Modal */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
-                    Checklist Item Status:
-                  </label>
-                  <select
-                    value={printStatusFilter}
-                    onChange={(e) => setPrintStatusFilter(e.target.value as StatusFilter)}
-                    className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-1.5 text-xs w-full focus:outline-none focus:border-blue-600 font-medium"
-                  >
-                    <option value="all">{STATUS_FILTER_LABELS.all[language]}</option>
-                    <option value="packed">{STATUS_FILTER_LABELS.packed[language]}</option>
-                    <option value="unpacked">{STATUS_FILTER_LABELS.unpacked[language]}</option>
-                  </select>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900/60 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
+                      Checklist Status:
+                    </label>
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                      Packed & Checked Items Only (Read-Only)
+                    </span>
+                  </div>
                 </div>
 
                 <div>
@@ -308,8 +296,9 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
 
               {/* Action Buttons */}
               <div className="flex items-center justify-between pt-1">
-                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                  Showing {previewItems.length} selected items
+                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  Showing {previewItems.length} packed items ready for printing
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -335,7 +324,7 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
               <div className="border-b-2 border-slate-900 pb-4 flex items-start justify-between gap-4">
                 <div>
                   <h1 className="text-xs font-mono tracking-widest font-bold uppercase text-slate-600">
-                    ILIGAN CITY DISASTER RISK REDUCTION & MANAGEMENT OFFICE (CDRRMO)
+                    ILIGAN CITY DISASTER RISK REDUCTION & MANAGEMENT DEPARTMENT (ICDRRMD)
                   </h1>
                   <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
                     FAMILY EMERGENCY GO-BAG CHECKLIST
@@ -353,18 +342,19 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
               {/* Selected Filter Notice */}
               <div className="bg-slate-100 border border-slate-300 p-3 rounded-xl text-xs font-medium text-slate-800 flex items-center justify-between">
                 <span>
-                  <strong>Selected View:</strong> {STATUS_FILTER_LABELS[printStatusFilter][language]} • Category: {CATEGORY_LABELS[printCategory]?.[language]}
+                  <strong>Selected View:</strong> Verified Packed Items Only • Category: {CATEGORY_LABELS[printCategory]?.[language] || printCategory}
                 </span>
-                <span className="font-mono text-[11px] font-bold">
-                  {previewItems.length} items listed
+                <span className="font-mono text-[11px] font-bold text-emerald-700">
+                  ✓ {previewItems.length} packed items
                 </span>
               </div>
 
               {/* Items Table */}
               <div className="space-y-2">
                 {previewItems.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-500 italic border border-dashed border-slate-300 rounded-xl">
-                    No items match the selected filter options. Try changing the category or status filter above.
+                  <div className="p-8 text-center text-xs text-slate-500 italic border border-dashed border-slate-300 rounded-xl space-y-1.5">
+                    <p className="font-semibold text-slate-700 text-sm">Walay na-check o na-pack nga items nga mapakita.</p>
+                    <p>Palihog i-check una ang mga gamit nga imong gi-andam sa checklist sa dili pa ablihan ang print preview.</p>
                   </div>
                 ) : (
                   <table className="w-full text-left border-collapse">
@@ -381,20 +371,10 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
                         <tr key={item.id} className="align-top hover:bg-slate-50/80 transition-colors">
                           <td className="py-2.5 px-2 text-center">
                             <div className="flex items-center justify-center pt-0.5">
-                              <button
-                                type="button"
-                                onClick={() => toggleItem(item.id)}
-                                className="cursor-pointer focus:outline-none"
-                                title={item.checked ? 'Mark as unpacked' : 'Mark as packed'}
-                              >
-                                {item.checked ? (
-                                  <div className="w-5 h-5 rounded-[5px] bg-[#7c3aed] text-white flex items-center justify-center shadow-2xs">
-                                    <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                  </div>
-                                ) : (
-                                  <div className="w-5 h-5 rounded-[5px] border-2 border-slate-500 bg-white" />
-                                )}
-                              </button>
+                              {/* Static Check Mark Only - Read-Only, No Checkbox Box, No Toggle */}
+                              <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center print:border print:border-slate-800 print:bg-slate-100 print:text-black shadow-2xs">
+                                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              </div>
                             </div>
                           </td>
                           <td className="py-2.5 px-2 font-semibold text-slate-900">
@@ -422,10 +402,10 @@ export const GoBagChecklist: React.FC<GoBagChecklistProps> = ({ language }) => {
               <div className="border-t border-slate-300 pt-4 text-[11px] text-slate-600 space-y-1">
                 <div className="font-bold text-slate-900 flex items-center gap-1.5">
                   <ShieldAlert className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Iligan City Emergency Contacts:</span>
+                  <span>Iligan City Disaster Risk Reduction and Management Department Emergency Contacts:</span>
                 </div>
                 <p>
-                  CDRRMO 24/7 Command Center: <strong>911</strong> | <strong>(063) 221-1234</strong> | <strong>0917-717-1234</strong> | Red Cross: <strong>143</strong>
+                  ICDRRMD 24/7 Communication Center: <strong>(063) 221-8459</strong> | <strong>0997-726-2692</strong> (Globe) | <strong>0969-233-7878</strong> (Smart)
                 </p>
                 <p className="text-[10px] text-slate-500 italic mt-1">
                   Keep your Go-Bag stored near your main exit door. Inspect food, water, and prescription medicines every 6 months.

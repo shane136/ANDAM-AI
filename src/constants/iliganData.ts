@@ -3,12 +3,12 @@ import { EmergencyContact, BarangayInfo, HazardGuide, GoBagItem, AdvisoryItem } 
 export const OFFICIAL_HOTLINES: EmergencyContact[] = [
   {
     id: 'cdrmmo-1',
-    name: 'Iligan City Disaster Risk Reduction & Management Office (ICDRRMO)',
-    agency: 'Iligan City Government / ICDRRMO',
+    name: 'Iligan City Disaster Risk Reduction & Management Department (ICDRRMD)',
+    agency: 'Iligan City Government / ICDRRMD',
     numbers: ['(063) 221-8459', '0997-726-2692', '0969-233-7878'],
     category: 'rescue',
-    address: 'ICDRRMO Compound, City Hall Complex, Buhanginan Hills, Pala-o, Iligan City',
-    description: 'Official 24/7 Command Center for Emergency Rescue, Flood & Landslide Evacuation, Disaster Monitoring, and Quick Response in Iligan City. Official FB: facebook.com/drrmoiligancity',
+    address: 'Seminary Drive, Pala-o, Iligan City',
+    description: 'Official 24/7 Communication Center for Emergency Rescue, Flood & Landslide Evacuation, Disaster Monitoring, and Quick Response in Iligan City. Official FB: facebook.com/drrmoiligancity',
     isAvailable247: true,
   },
   {
@@ -1125,10 +1125,10 @@ export const GO_BAG_ITEMS: GoBagItem[] = [
 
 export const OFFICIAL_SOURCES = [
   {
-    name: 'ICDRRMO Official Facebook Page',
+    name: 'ICDRRMD Official Facebook Page',
     url: 'https://www.facebook.com/drrmoiligancity',
-    description: 'Official 24/7 disaster advisories, river water level monitoring, and emergency rescue notices from Iligan City DRRMO.',
-    tag: 'ICDRRMO_FB',
+    description: 'Official 24/7 disaster advisories, river water level monitoring, and emergency rescue notices from Iligan City DRRMD.',
+    tag: 'ICDRRMD_FB',
   },
   {
     name: 'Iligan City Official Government Portal',
@@ -1159,7 +1159,7 @@ export const OFFICIAL_SOURCES = [
 export const SAMPLE_ADVISORIES: AdvisoryItem[] = [
   {
     id: 'adv-1',
-    title: 'CDRRMO Weather Alert: Localized Thunderstorms over Lanao del Norte',
+    title: 'ICDRRMD Weather Alert: Localized Thunderstorms over Lanao del Norte',
     agency: 'PAGASA',
     type: 'weather',
     level: 'advisory',
@@ -1179,11 +1179,11 @@ export const SAMPLE_ADVISORIES: AdvisoryItem[] = [
   },
   {
     id: 'adv-3',
-    title: 'Iligan ICDRRMO Reminder: Family Emergency Preparedness & 24/7 Hotlines',
-    agency: 'ILIGAN_CDRRMO',
+    title: 'Iligan ICDRRMD Reminder: Family Emergency Preparedness & 24/7 Hotlines',
+    agency: 'ILIGAN_ICDRRMD',
     type: 'general',
     level: 'info',
-    content: 'All 44 barangays of Iligan City are encouraged to review their local evacuation plans and inspect household Go-Bags. For 24/7 emergency response, contact ICDRRMO: (063) 221-8459, 0997-726-2692 (Globe), 0969-233-7878 (Smart). Official updates at facebook.com/drrmoiligancity.',
+    content: 'All 44 barangays of Iligan City are encouraged to review their local evacuation plans and inspect household Go-Bags. For 24/7 emergency response, contact ICDRRMD Communication Center: (063) 221-8459, 0997-726-2692 (Globe), 0969-233-7878 (Smart). Official updates at facebook.com/drrmoiligancity.',
     date: '2026-08-13 02:00 PM',
     link: 'https://www.facebook.com/drrmoiligancity',
   },

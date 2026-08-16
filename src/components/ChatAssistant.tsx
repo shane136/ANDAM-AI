@@ -1,6 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-import {useMutation} from '@tanstack/react-query';
 import {
   Send,
   ShieldAlert,
@@ -30,28 +28,6 @@ interface ChatAssistantProps {
   setSelectedBarangay: (b: string) => void;
 }
 
-interface ChatApiResponse {
-  text?: string;
-  fallbackReply?: string;
-  fallback?: boolean;
-  sources?: ChatMessage['sources'];
-}
-
-interface ChatApiRequest {
-  messages: { role: ChatMessage['sender']; content: string }[];
-  userLanguage: Language;
-  isEmergency: boolean;
-  barangay: string;
-}
-
-async function postChatMessage(payload: ChatApiRequest) {
-  const {data} = await axios.post<ChatApiResponse>('/api/chat', payload, {
-    headers: { 'Content-Type': 'application/json' },
-    timeout: 60_000,
-  });
-  return data;
-}
-
 export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   language,
   onNavigateToHotlines,
@@ -64,13 +40,13 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       id: 'welcome-1',
       sender: 'assistant',
       text: language === 'ceb'
-        ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan CDRRMO, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
+        ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
         : language === 'fil'
-        ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan CDRRMO, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
-        : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan CDRRMO, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
+        ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan ICDRRMD, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
+        : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan ICDRRMD, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       sources: [
-        { name: 'Iligan City LGU / CDRRMO', url: 'https://iligan.gov.ph/' },
+        { name: 'Iligan City LGU / ICDRRMD', url: 'https://iligan.gov.ph/' },
         { name: 'DOST-PAGASA', url: 'https://www.pagasa.dost.gov.ph/' },
         { name: 'DOST-PHIVOLCS', url: 'https://www.phivolcs.dost.gov.ph/' },
       ],
@@ -78,12 +54,11 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   ]);
 
   const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const chatMutation = useMutation({ mutationFn: postChatMessage });
-  const loading = chatMutation.isPending;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const quickQueriesRef = useRef<HTMLDivElement>(null);
@@ -185,6 +160,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
+    setLoading(true);
 
     try {
       // Build previous message chain for API context
@@ -193,12 +169,18 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         content: m.text,
       }));
 
-      const data = await chatMutation.mutateAsync({
-        messages: chatHistory,
-        userLanguage: language,
-        isEmergency: isEmergencyTrigger || isEmergencyMode,
-        barangay: selectedBarangay,
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: chatHistory,
+          userLanguage: language,
+          isEmergency: isEmergencyTrigger || isEmergencyMode,
+          barangay: selectedBarangay,
+        }),
       });
+
+      const data = await res.json();
 
       const assistantReply: ChatMessage = {
         id: `assistant-${Date.now()}`,
@@ -215,7 +197,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           { name: 'ICDRRMO Official Facebook Page', url: 'https://www.facebook.com/drrmoiligancity' },
           { name: 'Iligan City Government Portal', url: 'https://iligan.gov.ph/' },
         ],
-        isEmergency: Boolean(data.fallbackReply),
+        isEmergency: !res.ok || Boolean(data.fallbackReply),
       };
 
       setMessages((prev) => [...prev, assistantReply]);
@@ -225,18 +207,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         speakText(assistantReply.text);
       }
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const responseBody = typeof err.response?.data === 'string'
-          ? err.response.data.slice(0, 120)
-          : err.response?.data;
-        console.error('Error fetching chat response:', {
-          status: err.response?.status,
-          message: err.message,
-          response: responseBody,
-        });
-      } else {
-        console.error('Error fetching chat response:', err);
-      }
+      console.error('Error fetching chat response:', err);
       const fallbackReply: ChatMessage = {
         id: `assistant-${Date.now()}`,
         sender: 'assistant',
@@ -248,6 +219,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       };
       setMessages((prev) => [...prev, fallbackReply]);
     } finally {
+      setLoading(false);
       if (isEmergencyTrigger) {
         setIsEmergencyMode(false);
       }

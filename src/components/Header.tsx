@@ -52,7 +52,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
           </span>
           <span className="truncate text-[11px] md:text-xs font-sans">
-            <strong className="font-mono uppercase text-red-400 tracking-wider mr-1">CDRRMO Emergency Line:</strong>
+            <strong className="font-mono uppercase text-red-400 tracking-wider mr-1">ICDRRMD Emergency Hotlines:</strong>
             <span className="text-white font-bold font-mono">221-8459</span>
             <span className="mx-2 text-slate-600">|</span>
             <span className="text-slate-300 font-mono">0997-726-2692</span>

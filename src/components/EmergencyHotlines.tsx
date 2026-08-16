@@ -55,13 +55,13 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm max-w-2xl leading-relaxed">
               {language === 'ceb'
-                ? 'Tipigi kini nga mga opisyal nga numero sa imong telepono. Tawag dayon sa CDRRMO o Rescuers panahon sa baha, linog, o sunog.'
+                ? 'Tipigi kini nga mga opisyal nga numero sa imong telepono. Tawag dayon sa ICDRRMD o Rescuers panahon sa baha, linog, o sunog.'
                 : 'Keep these verified Iligan City emergency response numbers handy on your phone for immediate 1-tap dialing during disasters.'}
             </p>
           </div>
 
           <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 rounded-3xl p-6 text-center text-slate-900 dark:text-white shadow-md min-w-[290px] w-full md:w-auto">
-            <span className="text-xs uppercase font-mono tracking-wider text-red-600 dark:text-red-400 block font-semibold">ICDRRMO Official Hotlines</span>
+            <span className="text-xs uppercase font-mono tracking-wider text-red-600 dark:text-red-400 block font-semibold">ICDRRMD 24/7 Communication Center</span>
             <div className="text-2xl font-black font-mono my-1 tracking-wider text-red-600 dark:text-red-400">
               (063) 221-8459
             </div>
@@ -210,7 +210,7 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
         <div>
           <strong className="font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide block mb-1">Iligan City Public Safety Advisory:</strong>
           <span className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            Panahon sa grabeng baha o kalamidad, unaha ang pagtawag sa <strong className="text-slate-900 dark:text-white font-bold">ICDRRMO Rescue ((063) 221-8459 | 0997-726-2692 | 0969-233-7878)</strong>. Siguroha nga andam ang imong ensakto nga barangay ug street address alang sa paspas nga pagtubag sa mga responders.
+            Panahon sa grabeng baha o kalamidad, unaha ang pagtawag sa <strong className="text-slate-900 dark:text-white font-bold">ICDRRMD Communication Center ((063) 221-8459 | 0997-726-2692 | 0969-233-7878)</strong>. Siguroha nga andam ang imong ensakto nga barangay ug street address alang sa paspas nga pagtubag sa mga responders.
           </span>
         </div>
       </div>
