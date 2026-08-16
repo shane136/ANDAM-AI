@@ -67,7 +67,7 @@ body {
 /* Print Styles */
 @page {
   size: A4 portrait;
-  margin: 12mm 15mm;
+  margin: 8mm 12mm;
 }
 
 @media print {
@@ -77,7 +77,10 @@ body {
     margin: 0 !important;
     padding: 0 !important;
     height: auto !important;
+    min-height: 100% !important;
     overflow: visible !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
   }
 
   /* Hide everything outside of print document */
@@ -87,6 +90,8 @@ body {
 
   #root {
     display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   /* Hide modal overlay artifacts */
@@ -99,6 +104,7 @@ body {
   .backdrop-blur-xs,
   .fixed.inset-0 {
     background: transparent !important;
+    position: static !important;
   }
 
   body * {
@@ -119,14 +125,25 @@ body {
     max-width: 100% !important;
     max-height: none !important;
     overflow: visible !important;
-    margin: 0 auto !important;
+    margin: 0 !important;
     padding: 0 !important;
     background: #ffffff !important;
     color: #0f172a !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
-    page-break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-preview-document table {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  .print-preview-document tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .no-print {
