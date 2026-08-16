@@ -1,4 +1,16 @@
-import app from "../server";
+export default {
+  fetch(request: Request) {
+    if (request.method !== "GET") {
+      return Response.json(
+        { error: "Method not allowed." },
+        { status: 405, headers: { Allow: "GET" } },
+      );
+    }
 
-// Vercel maps this file to /api/health and invokes the shared Express app.
-export default app;
+    return Response.json({
+      status: "ok",
+      app: "ANDAM AI - Iligan City DRRM Assistant",
+      hasApiKey: Boolean(process.env.GEMINI_API_KEY),
+    });
+  },
+};

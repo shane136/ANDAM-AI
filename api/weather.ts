@@ -1,4 +1,22 @@
-import app from "../server";
+import { fetchIliganRealtimeWeather } from "../src/services/weatherService.js";
 
-// Vercel maps this file to /api/weather and invokes the shared Express app.
-export default app;
+export default {
+  async fetch(request: Request) {
+    if (request.method !== "GET") {
+      return Response.json(
+        { error: "Method not allowed." },
+        { status: 405, headers: { Allow: "GET" } },
+      );
+    }
+
+    try {
+      return Response.json(await fetchIliganRealtimeWeather());
+    } catch (error) {
+      console.error("Error fetching Iligan weather:", error);
+      return Response.json(
+        { error: "Failed to fetch the weather update for Iligan City." },
+        { status: 500 },
+      );
+    }
+  },
+};
