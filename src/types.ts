@@ -93,7 +93,7 @@ export interface WeatherData {
 export interface AdvisoryItem {
   id: string;
   title: string;
-  agency: 'ILIGAN_CDRRMO' | 'PAGASA' | 'PHIVOLCS' | 'ILIGAN_LGU';
+  agency: 'ILIGAN_ICDRRMD' | 'ILIGAN_CDRRMO' | 'PAGASA' | 'PHIVOLCS' | 'ILIGAN_LGU';
   type: 'weather' | 'earthquake' | 'flood' | 'general';
   level: 'info' | 'advisory' | 'warning' | 'critical';
   content: string;

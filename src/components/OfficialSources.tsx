@@ -25,7 +25,7 @@ export const OfficialSources: React.FC<OfficialSourcesProps> = ({ language }) =>
                 : 'Verified Official Government DRRM Sources'}
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 leading-relaxed">
-              Kanunay nga i-verify ang balita gikan lamang sa mga opisyal nga ahensya sa gobyerno sama sa Iligan City Government, CDRRMO, DOST-PAGASA, ug DOST-PHIVOLCS.
+              Kanunay nga i-verify ang balita gikan lamang sa mga opisyal nga ahensya sa gobyerno sama sa Iligan City Government, ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS.
             </p>
           </div>
         </div>
@@ -104,7 +104,7 @@ export const OfficialSources: React.FC<OfficialSourcesProps> = ({ language }) =>
         <div>
           <strong className="font-semibold uppercase tracking-wider text-red-700 dark:text-red-400 block mb-1">Verify Before Sharing:</strong>
           <span className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            Ang mga linog ug bagyo DILI ma-predict pinaagi sa wala mailhing post sa social media. Kanunay mangayo ug mopakaylap lamang sa opisyal nga advisories gikan sa Iligan City Government, CDRRMO, PAGASA, ug PHIVOLCS.
+            Ang mga linog ug bagyo DILI ma-predict pinaagi sa wala mailhing post sa social media. Kanunay mangayo ug mopakaylap lamang sa opisyal nga advisories gikan sa Iligan City Government, ICDRRMD, PAGASA, ug PHIVOLCS.
           </span>
         </div>
       </div>
