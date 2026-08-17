@@ -64,13 +64,13 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       id: 'welcome-1',
       sender: 'assistant',
       text: language === 'ceb'
-        ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan CDRRMO, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
+        ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
         : language === 'fil'
-        ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan CDRRMO, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
-        : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan CDRRMO, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
+        ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan ICDRRMD, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
+        : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan ICDRRMD, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       sources: [
-        { name: 'Iligan City LGU / CDRRMO', url: 'https://iligan.gov.ph/' },
+        { name: 'Iligan City LGU / ICDRRMD', url: 'https://iligan.gov.ph/' },
         { name: 'DOST-PAGASA', url: 'https://www.pagasa.dost.gov.ph/' },
         { name: 'DOST-PHIVOLCS', url: 'https://www.phivolcs.dost.gov.ph/' },
       ],

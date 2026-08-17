@@ -127,7 +127,7 @@ export default function App() {
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 block font-semibold">ICDRRMO 24/7 Hotline Numbers:</span>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 block font-semibold">ICDRRMD 24/7 Hotline Numbers:</span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 font-mono font-bold text-xs">
                 <a
                   href="tel:0632218459"
