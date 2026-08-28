@@ -55,6 +55,25 @@ async function postChatMessage(payload: ChatApiRequest) {
   return data;
 }
 
+function createWelcomeMessage(language: Language): ChatMessage {
+  return {
+    id: 'welcome-1',
+    sender: 'assistant',
+    text: language === 'ceb'
+      ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
+      : language === 'fil'
+      ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan ICDRRMD, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
+      : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan ICDRRMD, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    language,
+    sources: [
+      { name: 'Iligan City LGU / ICDRRMD', url: 'https://iligan.gov.ph/' },
+      { name: 'DOST-PAGASA', url: 'https://www.pagasa.dost.gov.ph/' },
+      { name: 'DOST-PHIVOLCS', url: 'https://www.phivolcs.dost.gov.ph/' },
+    ],
+  };
+}
+
 export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   language,
   onNavigateToHotlines,
@@ -62,23 +81,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   selectedBarangay,
   setSelectedBarangay,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome-1',
-      sender: 'assistant',
-      text: language === 'ceb'
-        ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
-        : language === 'fil'
-        ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan ICDRRMD, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
-        : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan ICDRRMD, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sources: [
-        { name: 'Iligan City LGU / ICDRRMD', url: 'https://iligan.gov.ph/' },
-        { name: 'DOST-PAGASA', url: 'https://www.pagasa.dost.gov.ph/' },
-        { name: 'DOST-PHIVOLCS', url: 'https://www.phivolcs.dost.gov.ph/' },
-      ],
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage(language)]);
 
   const [input, setInput] = useState('');
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
@@ -128,6 +131,13 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
+
+  useEffect(() => {
+    stopAudio();
+    setMessages((previousMessages) => previousMessages.map((message) =>
+      message.id === 'welcome-1' ? createWelcomeMessage(language) : message
+    ));
+  }, [language, stopAudio]);
 
   // Preset Chips
   const presetChips = [
@@ -231,6 +241,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
             : '⚠️ The AI assistant is currently experiencing high demand. If you have an urgent emergency, please call **ICDRRMO Rescue Hotline: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** immediately.'
         ),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        language,
         sources: data.sources || [
           { name: 'ICDRRMO Official Facebook Page', url: 'https://www.facebook.com/drrmoiligancity' },
           { name: 'Iligan City Government Portal', url: 'https://iligan.gov.ph/' },
@@ -264,6 +275,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           ? '⚠️ Pasensya, naglisod ang koneksyon sa AI Assistant karon.\n\n**DINALIAN NGA PAHIBALO SA EMERHENSYA:**\nKun anaa ka sa peligro o baha sa Iligan City, palihog tawag dayon sa **ICDRRMO Rescue Hotlines: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** (Official FB: facebook.com/drrmoiligancity).'
           : '⚠️ Unable to connect to DRRM AI server.\n\n**URGENT EMERGENCY ALERT:**\nIf you are in danger or facing flooding in Iligan City, call **ICDRRMO Rescue Hotlines: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** (Official FB: facebook.com/drrmoiligancity) immediately.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        language,
         isEmergency: true,
       };
       setMessages((prev) => [...prev, fallbackReply]);
@@ -572,7 +584,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                 {!isUser && (
                   <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition">
                     <button
-                      onClick={() => togglePlayPauseMessage(msg.id, msg.text, language)}
+                      onClick={() => togglePlayPauseMessage(msg.id, msg.text, msg.language || language)}
                       className={`p-1.5 rounded-lg border transition cursor-pointer flex items-center gap-1 text-xs font-medium ${
                         isCurrentSpeaking
                           ? 'bg-blue-600 text-white border-blue-600 shadow-xs'

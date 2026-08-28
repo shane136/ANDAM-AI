@@ -190,13 +190,15 @@ class TextToSpeechManager {
       return { voice: null, langCode: 'fil-PH' };
     } else {
       // English
-      const enPhVoice = this.voices.find((v) => v.lang.toLowerCase() === 'en-ph');
-      if (enPhVoice) return { voice: enPhVoice, langCode: 'en-PH' };
-
-      const enVoice = this.voices.find(
-        (v) => v.lang.toLowerCase().startsWith('en') && (v.default || v.lang.toLowerCase() === 'en-us')
-      );
+      // Prefer broadly available English voices before Philippine English. Some
+      // devices localize their en-PH voice, which can sound like a Bisaya fallback.
+      const enVoice = this.voices.find((v) =>
+        ['en-us', 'en-gb', 'en-au', 'en-ca'].includes(v.lang.toLowerCase())
+      ) || this.voices.find((v) => v.lang.toLowerCase().startsWith('en') && v.default);
       if (enVoice) return { voice: enVoice, langCode: enVoice.lang };
+
+      const anyEnglishVoice = this.voices.find((v) => v.lang.toLowerCase().startsWith('en'));
+      if (anyEnglishVoice) return { voice: anyEnglishVoice, langCode: anyEnglishVoice.lang };
 
       return { voice: null, langCode: 'en-US' };
     }

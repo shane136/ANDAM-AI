@@ -135,7 +135,7 @@ export default {
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
 
-      let systemInstruction = `${ILIGAN_DRRM_SYSTEM_INSTRUCTION}\nPREFERRED LANGUAGE: ${language}.`;
+      let systemInstruction = `${ILIGAN_DRRM_SYSTEM_INSTRUCTION}\nRESPONSE LANGUAGE: ${language}. Reply entirely in the selected response language, even when the user's message or prior chat history uses a different language.`;
       if (body.barangay) systemInstruction += `\nUSER LOCATION: Barangay ${body.barangay}, Iligan City.`;
       if (body.isEmergency) systemInstruction += "\nACTIVE EMERGENCY: Give immediate safety steps and ICDRRMO hotlines first.";
       if (weather) systemInstruction += `\nWEATHER CONTEXT (${weather.timestamp}): ${JSON.stringify(weather)}`;
