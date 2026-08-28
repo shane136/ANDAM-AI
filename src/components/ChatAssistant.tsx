@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
+import { useMutation } from '@tanstack/react-query';
 import {
   Send,
   ShieldAlert,
@@ -6,19 +8,22 @@ import {
   MicOff,
   Volume2,
   VolumeX,
+  Play,
+  Pause,
+  Square,
   Copy,
   Check,
   MapPin,
   RefreshCw,
   Sparkles,
   AlertTriangle,
-  Info,
   ExternalLink,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
 import { ChatMessage, Language } from '../types';
 import { ILIGAN_BARANGAYS } from '../constants/iliganData';
+import { useTextToSpeech } from '../hooks/useTextToSpeech';
 
 interface ChatAssistantProps {
   language: Language;
@@ -28,6 +33,47 @@ interface ChatAssistantProps {
   setSelectedBarangay: (b: string) => void;
 }
 
+interface ChatApiResponse {
+  text?: string;
+  fallbackReply?: string;
+  fallback?: boolean;
+  sources?: ChatMessage['sources'];
+}
+
+interface ChatApiRequest {
+  messages: { role: ChatMessage['sender']; content: string }[];
+  userLanguage: Language;
+  isEmergency: boolean;
+  barangay: string;
+}
+
+async function postChatMessage(payload: ChatApiRequest) {
+  const { data } = await axios.post<ChatApiResponse>('/api/chat', payload, {
+    headers: { 'Content-Type': 'application/json' },
+    timeout: 60_000,
+  });
+  return data;
+}
+
+function createWelcomeMessage(language: Language): ChatMessage {
+  return {
+    id: 'welcome-1',
+    sender: 'assistant',
+    text: language === 'ceb'
+      ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
+      : language === 'fil'
+      ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan ICDRRMD, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
+      : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan ICDRRMD, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    language,
+    sources: [
+      { name: 'Iligan City LGU / ICDRRMD', url: 'https://iligan.gov.ph/' },
+      { name: 'DOST-PAGASA', url: 'https://www.pagasa.dost.gov.ph/' },
+      { name: 'DOST-PHIVOLCS', url: 'https://www.phivolcs.dost.gov.ph/' },
+    ],
+  };
+}
+
 export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   language,
   onNavigateToHotlines,
@@ -35,30 +81,29 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   selectedBarangay,
   setSelectedBarangay,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome-1',
-      sender: 'assistant',
-      text: language === 'ceb'
-        ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
-        : language === 'fil'
-        ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan ICDRRMD, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
-        : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan ICDRRMD, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      sources: [
-        { name: 'Iligan City LGU / ICDRRMD', url: 'https://iligan.gov.ph/' },
-        { name: 'DOST-PAGASA', url: 'https://www.pagasa.dost.gov.ph/' },
-        { name: 'DOST-PHIVOLCS', url: 'https://www.phivolcs.dost.gov.ph/' },
-      ],
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage(language)]);
 
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const {
+    isAutoVoiceEnabled,
+    playbackState,
+    activeMessageId,
+    progress,
+    toggleAutoVoice,
+    playMessage,
+    pauseAudio,
+    resumeAudio,
+    stopAudio,
+    togglePlayPauseMessage,
+    unlockAudio,
+  } = useTextToSpeech();
+
+  const chatMutation = useMutation({ mutationFn: postChatMessage });
+  const loading = chatMutation.isPending;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const quickQueriesRef = useRef<HTMLDivElement>(null);
@@ -86,6 +131,13 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
+
+  useEffect(() => {
+    stopAudio();
+    setMessages((previousMessages) => previousMessages.map((message) =>
+      message.id === 'welcome-1' ? createWelcomeMessage(language) : message
+    ));
+  }, [language, stopAudio]);
 
   // Preset Chips
   const presetChips = [
@@ -149,6 +201,9 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     const textToSend = customPrompt || input;
     if (!textToSend.trim()) return;
 
+    // Unlock mobile Web Audio/SpeechSynthesis synchronously on user tap/click
+    unlockAudio();
+
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       sender: 'user',
@@ -160,7 +215,6 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
-    setLoading(true);
 
     try {
       // Build previous message chain for API context
@@ -169,18 +223,12 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         content: m.text,
       }));
 
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: chatHistory,
-          userLanguage: language,
-          isEmergency: isEmergencyTrigger || isEmergencyMode,
-          barangay: selectedBarangay,
-        }),
+      const data = await chatMutation.mutateAsync({
+        messages: chatHistory,
+        userLanguage: language,
+        isEmergency: isEmergencyTrigger || isEmergencyMode,
+        barangay: selectedBarangay,
       });
-
-      const data = await res.json();
 
       const assistantReply: ChatMessage = {
         id: `assistant-${Date.now()}`,
@@ -193,21 +241,33 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
             : '⚠️ The AI assistant is currently experiencing high demand. If you have an urgent emergency, please call **ICDRRMO Rescue Hotline: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** immediately.'
         ),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        language,
         sources: data.sources || [
           { name: 'ICDRRMO Official Facebook Page', url: 'https://www.facebook.com/drrmoiligancity' },
           { name: 'Iligan City Government Portal', url: 'https://iligan.gov.ph/' },
         ],
-        isEmergency: !res.ok || Boolean(data.fallbackReply),
+        isEmergency: Boolean(data.fallbackReply),
       };
 
       setMessages((prev) => [...prev, assistantReply]);
 
-      // If TTS enabled, auto speak
-      if (isSpeaking && window.speechSynthesis) {
-        speakText(assistantReply.text);
+      // If Auto Voice Output is enabled, automatically speak the new response
+      if (isAutoVoiceEnabled) {
+        playMessage(assistantReply.id, assistantReply.text, language);
       }
     } catch (err) {
-      console.error('Error fetching chat response:', err);
+      if (axios.isAxiosError(err)) {
+        const responseBody = typeof err.response?.data === 'string'
+          ? err.response.data.slice(0, 120)
+          : err.response?.data;
+        console.error('Error fetching chat response:', {
+          status: err.response?.status,
+          message: err.message,
+          response: responseBody,
+        });
+      } else {
+        console.error('Error fetching chat response:', err);
+      }
       const fallbackReply: ChatMessage = {
         id: `assistant-${Date.now()}`,
         sender: 'assistant',
@@ -215,11 +275,15 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           ? '⚠️ Pasensya, naglisod ang koneksyon sa AI Assistant karon.\n\n**DINALIAN NGA PAHIBALO SA EMERHENSYA:**\nKun anaa ka sa peligro o baha sa Iligan City, palihog tawag dayon sa **ICDRRMO Rescue Hotlines: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** (Official FB: facebook.com/drrmoiligancity).'
           : '⚠️ Unable to connect to DRRM AI server.\n\n**URGENT EMERGENCY ALERT:**\nIf you are in danger or facing flooding in Iligan City, call **ICDRRMO Rescue Hotlines: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** (Official FB: facebook.com/drrmoiligancity) immediately.',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        language,
         isEmergency: true,
       };
       setMessages((prev) => [...prev, fallbackReply]);
+
+      if (isAutoVoiceEnabled) {
+        playMessage(fallbackReply.id, fallbackReply.text, language);
+      }
     } finally {
-      setLoading(false);
       if (isEmergencyTrigger) {
         setIsEmergencyMode(false);
       }
@@ -227,6 +291,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   };
 
   const handleVoiceInput = () => {
+    unlockAudio();
+
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       alert('Speech Recognition is not supported in this browser version. Please type your message.');
       return;
@@ -254,30 +320,6 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     }
   };
 
-  const speakText = (text: string) => {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-
-    // Clean markdown syntax for speech
-    const cleanText = text.replace(/[*#_~`-]/g, '');
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = language === 'ceb' ? 'fil-PH' : language === 'fil' ? 'fil-PH' : 'en-US';
-    utterance.rate = 1.0;
-
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
-    setIsSpeaking(true);
-  };
-
-  const stopSpeaking = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    }
-  };
-
   const copyToClipboard = (id: string, text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedId(id);
@@ -292,9 +334,6 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         {lines.map((line, idx) => {
           if (!line.trim()) return <div key={idx} className="h-1" />;
 
-          // Check for bold or bullet points
-          let formattedLine = line;
-
           const isHeader = line.startsWith('###') || line.startsWith('##') || line.startsWith('#');
           const isBullet = line.trim().startsWith('*') || line.trim().startsWith('-');
 
@@ -306,8 +345,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
             );
           }
 
-          // Parse **bold** parts
-          const parts = formattedLine.split(/(\*\*.*?\*\*)/g);
+          const parts = line.split(/(\*\*.*?\*\*)/g);
 
           return (
             <p key={idx} className={`${isBullet ? 'pl-4 relative font-medium' : ''}`}>
@@ -330,9 +368,9 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none transition-colors">
-      {/* Top Controls Bar (Sticky / Pinned inside chat container) */}
-      <div className="shrink-0 bg-slate-50/90 dark:bg-slate-950/80 px-4 md:px-6 py-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none my-1 min-h-[620px] transition-colors">
+      {/* Top Controls Bar */}
+      <div className="bg-slate-50/90 dark:bg-slate-950/80 px-4 md:px-6 py-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
         {/* Barangay Selector */}
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -365,30 +403,89 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           >
             <span>🎒 Family Go-Bag</span>
           </button>
-          {isSpeaking ? (
-            <button
-              onClick={stopSpeaking}
-              className="bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800 px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 transition cursor-pointer"
-            >
-              <VolumeX className="w-3.5 h-3.5" />
-              <span>Stop Audio</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setIsSpeaking(true)}
-              className="bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 transition border border-slate-200 dark:border-slate-700 cursor-pointer shadow-2xs"
-              title="Enable voice audio reading"
-            >
-              <Volume2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>Voice Output</span>
-            </button>
-          )}
+
+          {/* Master Voice Output Toggle Button */}
+          <button
+            onClick={() => toggleAutoVoice()}
+            className={`px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition border cursor-pointer shadow-2xs ${
+              isAutoVoiceEnabled
+                ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-700 font-semibold'
+                : 'bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+            }`}
+            title={isAutoVoiceEnabled ? 'Auto Voice Output is enabled (Click to turn off)' : 'Auto Voice Output is off (Click to enable)'}
+          >
+            {isAutoVoiceEnabled ? (
+              <>
+                <Volume2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-pulse" />
+                <span>Auto Voice: <strong className="text-blue-700 dark:text-blue-300 font-bold">ON</strong></span>
+              </>
+            ) : (
+              <>
+                <VolumeX className="w-3.5 h-3.5 text-slate-400" />
+                <span>Auto Voice: <strong>OFF</strong></span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
+      {/* Floating Active Voice Playback Controller Bar */}
+      {playbackState !== 'idle' && (
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white px-4 md:px-6 py-2.5 flex items-center justify-between gap-3 text-xs shadow-md border-b border-blue-500/30">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg shrink-0">
+              <span className="w-1 bg-white rounded-full animate-wave-1"></span>
+              <span className="w-1 bg-white rounded-full animate-wave-2"></span>
+              <span className="w-1 bg-white rounded-full animate-wave-3"></span>
+              <span className="w-1 bg-white rounded-full animate-wave-4"></span>
+            </div>
+            <div className="truncate">
+              <span className="font-semibold tracking-wide">
+                {playbackState === 'playing' ? 'Voice Output Speaking...' : 'Voice Output Paused'}
+              </span>
+              {progress.total > 1 && (
+                <span className="text-[10px] text-blue-100/90 font-mono ml-2 hidden sm:inline">
+                  (Sentence {progress.current} of {progress.total})
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {playbackState === 'playing' ? (
+              <button
+                onClick={pauseAudio}
+                className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer text-xs font-semibold"
+                title="Pause audio"
+              >
+                <Pause className="w-3.5 h-3.5" />
+                <span>Pause</span>
+              </button>
+            ) : (
+              <button
+                onClick={resumeAudio}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer text-xs font-semibold shadow-xs"
+                title="Resume audio"
+              >
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>Resume</span>
+              </button>
+            )}
+            <button
+              onClick={stopAudio}
+              className="bg-red-500/90 hover:bg-red-600 text-white p-1.5 rounded-xl transition cursor-pointer flex items-center gap-1 text-xs font-semibold shadow-xs"
+              title="Stop audio playback"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+              <span className="hidden sm:inline">Stop</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Emergency Mode Bar */}
       {isEmergencyMode && (
-        <div className="shrink-0 bg-red-500/10 border-b border-red-500/20 px-5 py-2.5 text-xs text-red-700 dark:text-red-300 flex items-center justify-between font-sans">
+        <div className="bg-red-500/10 border-b border-red-500/20 px-5 py-2.5 text-xs text-red-700 dark:text-red-300 flex items-center justify-between font-sans">
           <div className="flex items-center gap-2 font-semibold animate-pulse">
             <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
             <span>ACTIVE EMERGENCY MODE ENABLED: Responses prioritized for immediate life safety!</span>
@@ -402,10 +499,13 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         </div>
       )}
 
-      {/* Messages Scroll View (Only this section scrolls) */}
-      <div className="flex-1 min-h-0 p-4 md:p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-950/40 transition-colors">
+      {/* Messages Scroll View */}
+      <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-950/40 min-h-[380px] transition-colors">
         {messages.map((msg) => {
           const isUser = msg.sender === 'user';
+          const isCurrentSpeaking = activeMessageId === msg.id && playbackState === 'playing';
+          const isCurrentPaused = activeMessageId === msg.id && playbackState === 'paused';
+
           return (
             <div
               key={msg.id}
@@ -423,6 +523,16 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                     EMERGENCY
                   </span>
                 )}
+                {isCurrentSpeaking && (
+                  <span className="bg-blue-600 text-white text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold flex items-center gap-1 animate-pulse">
+                    <span className="w-1 h-1 rounded-full bg-white animate-ping"></span> Speaking
+                  </span>
+                )}
+                {isCurrentPaused && (
+                  <span className="bg-amber-600 text-white text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
+                    Paused
+                  </span>
+                )}
               </div>
 
               <div
@@ -431,6 +541,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                     ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-xs max-w-[85%] text-sm leading-relaxed shadow-md shadow-blue-500/10'
                     : msg.isEmergency
                     ? 'bg-red-50/90 border border-red-300 text-slate-900 dark:bg-slate-900 dark:border-red-600/60 dark:text-slate-100 rounded-tl-xs max-w-[90%]'
+                    : isCurrentSpeaking
+                    ? 'bg-white border-2 border-blue-500/80 text-slate-800 dark:bg-slate-900 dark:border-blue-500/80 dark:text-slate-100 rounded-tl-xs max-w-[90%] ring-2 ring-blue-500/10'
                     : 'bg-white border border-slate-200/90 text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 rounded-tl-xs max-w-[90%]'
                 }`}
               >
@@ -468,15 +580,50 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                   </div>
                 )}
 
-                {/* Copy Button */}
+                {/* Message Actions: Audio Play/Pause Button + Copy Button */}
                 {!isUser && (
-                  <button
-                    onClick={() => copyToClipboard(msg.id, msg.text)}
-                    className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer"
-                    title="Copy message"
-                  >
-                    {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  </button>
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition">
+                    <button
+                      onClick={() => togglePlayPauseMessage(msg.id, msg.text, msg.language || language)}
+                      className={`p-1.5 rounded-lg border transition cursor-pointer flex items-center gap-1 text-xs font-medium ${
+                        isCurrentSpeaking
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                          : isCurrentPaused
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                      }`}
+                      title={
+                        isCurrentSpeaking
+                          ? 'Pause audio reading'
+                          : isCurrentPaused
+                          ? 'Resume audio reading'
+                          : 'Listen to response'
+                      }
+                    >
+                      {isCurrentSpeaking ? (
+                        <>
+                          <div className="flex items-center gap-0.5 px-0.5">
+                            <span className="w-0.5 bg-white rounded-full animate-wave-1"></span>
+                            <span className="w-0.5 bg-white rounded-full animate-wave-2"></span>
+                            <span className="w-0.5 bg-white rounded-full animate-wave-3"></span>
+                          </div>
+                          <Pause className="w-3.5 h-3.5" />
+                        </>
+                      ) : isCurrentPaused ? (
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                      ) : (
+                        <Volume2 className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => copyToClipboard(msg.id, msg.text)}
+                      className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer transition"
+                      title="Copy message"
+                    >
+                      {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -496,7 +643,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       </div>
 
       {/* Quick Prompt Chips */}
-      <div className="shrink-0 bg-slate-50 dark:bg-slate-900/90 px-3 sm:px-5 py-2.5 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 transition-colors">
+      <div className="bg-slate-50 dark:bg-slate-900/90 px-3 sm:px-5 py-2.5 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 transition-colors">
         <button
           type="button"
           onClick={() => scrollQuickQueries('left')}
@@ -540,7 +687,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       </div>
 
       {/* Input Box */}
-      <div className="shrink-0 p-4 md:p-5 bg-slate-100/90 dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex flex-col gap-3 transition-colors">
+      <div className="p-4 md:p-5 bg-slate-100/90 dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex flex-col gap-3 transition-colors">
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Emergency Mode Toggle */}
           <button
@@ -601,7 +748,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           <span>
             Official DRRM Info Tool • Hotlines: <strong className="font-mono text-slate-700 dark:text-slate-300"> 221-8459 | 0997-726-2692 | 0969-233-7878</strong>
           </span>
-          <span className="font-mono text-[10px] text-slate-400">Gemini 3.6 Flash</span>
+          <span className="font-mono text-[10px] text-slate-400">Gemini 3.7 Flash</span>
         </div>
       </div>
     </div>
