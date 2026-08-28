@@ -330,9 +330,9 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none my-1 min-h-[620px] transition-colors">
-      {/* Top Controls Bar */}
-      <div className="bg-slate-50/90 dark:bg-slate-950/80 px-4 md:px-6 py-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+    <div className="w-full h-full flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none transition-colors">
+      {/* Top Controls Bar (Sticky / Pinned inside chat container) */}
+      <div className="shrink-0 bg-slate-50/90 dark:bg-slate-950/80 px-4 md:px-6 py-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
         {/* Barangay Selector */}
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -388,7 +388,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
       {/* Emergency Mode Bar */}
       {isEmergencyMode && (
-        <div className="bg-red-500/10 border-b border-red-500/20 px-5 py-2.5 text-xs text-red-700 dark:text-red-300 flex items-center justify-between font-sans">
+        <div className="shrink-0 bg-red-500/10 border-b border-red-500/20 px-5 py-2.5 text-xs text-red-700 dark:text-red-300 flex items-center justify-between font-sans">
           <div className="flex items-center gap-2 font-semibold animate-pulse">
             <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
             <span>ACTIVE EMERGENCY MODE ENABLED: Responses prioritized for immediate life safety!</span>
@@ -402,8 +402,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         </div>
       )}
 
-      {/* Messages Scroll View */}
-      <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-950/40 min-h-[380px] transition-colors">
+      {/* Messages Scroll View (Only this section scrolls) */}
+      <div className="flex-1 min-h-0 p-4 md:p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-950/40 transition-colors">
         {messages.map((msg) => {
           const isUser = msg.sender === 'user';
           return (
@@ -496,7 +496,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       </div>
 
       {/* Quick Prompt Chips */}
-      <div className="bg-slate-50 dark:bg-slate-900/90 px-3 sm:px-5 py-2.5 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 transition-colors">
+      <div className="shrink-0 bg-slate-50 dark:bg-slate-900/90 px-3 sm:px-5 py-2.5 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 transition-colors">
         <button
           type="button"
           onClick={() => scrollQuickQueries('left')}
@@ -540,7 +540,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       </div>
 
       {/* Input Box */}
-      <div className="p-4 md:p-5 bg-slate-100/90 dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex flex-col gap-3 transition-colors">
+      <div className="shrink-0 p-4 md:p-5 bg-slate-100/90 dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 flex flex-col gap-3 transition-colors">
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Emergency Mode Toggle */}
           <button
