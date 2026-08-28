@@ -36,8 +36,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200 antialiased">
-      {/* Top Navigation Header */}
+    <div className="h-screen h-[100dvh] bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200 antialiased overflow-hidden">
+      {/* Top Navigation Header (Permanently fixed to viewport top) */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -49,7 +49,7 @@ export default function App() {
       />
 
       {/* Main Content Viewport */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 flex flex-col">
+      <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-3 flex flex-col overflow-hidden">
         {activeTab === 'chat' && (
           <ChatAssistant
             language={language}
@@ -60,27 +60,45 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'hotlines' && <EmergencyHotlines language={language} />}
-
-        {activeTab === 'barangays' && (
-          <BarangayHazardExplorer
-            language={language}
-            selectedBarangay={selectedBarangay}
-            setSelectedBarangay={setSelectedBarangay}
-            onAskChatbotAboutBarangay={handleAskChatbotAboutBarangay}
-          />
+        {activeTab === 'hotlines' && (
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <EmergencyHotlines language={language} />
+          </div>
         )}
 
-        {activeTab === 'guides' && <DisasterGuides language={language} />}
+        {activeTab === 'barangays' && (
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <BarangayHazardExplorer
+              language={language}
+              selectedBarangay={selectedBarangay}
+              setSelectedBarangay={setSelectedBarangay}
+              onAskChatbotAboutBarangay={handleAskChatbotAboutBarangay}
+            />
+          </div>
+        )}
 
-        {activeTab === 'gobag' && <GoBagChecklist language={language} />}
+        {activeTab === 'guides' && (
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <DisasterGuides language={language} />
+          </div>
+        )}
 
-        {activeTab === 'sources' && <OfficialSources language={language} />}
+        {activeTab === 'gobag' && (
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <GoBagChecklist language={language} />
+          </div>
+        )}
+
+        {activeTab === 'sources' && (
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+            <OfficialSources language={language} />
+          </div>
+        )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 py-4 px-4 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* Footer (Permanently fixed to viewport bottom) */}
+      <footer className="shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 py-2.5 sm:py-3 px-4 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>
