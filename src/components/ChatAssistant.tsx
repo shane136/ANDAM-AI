@@ -330,9 +330,9 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   const renderFormattedText = (text: string) => {
     const lines = text.split('\n');
     return (
-      <div className="space-y-1.5 text-sm leading-relaxed">
-        {lines.map((line, idx) => {
-          if (!line.trim()) return <div key={idx} className="h-1" />;
+      <div className="w-full h-full flex-1 min-h-0 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none transition-colors">
+      {/* Top Controls Bar (Sticky / Pinned inside chat container) */}
+      <div className="shrink-0 bg-slate-50/90 dark:bg-slate-950/80 px-4 md:px-6 py-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
 
           const isHeader = line.startsWith('###') || line.startsWith('##') || line.startsWith('#');
           const isBullet = line.trim().startsWith('*') || line.trim().startsWith('-');
