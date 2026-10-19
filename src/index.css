@@ -33,6 +33,15 @@
   --dark-text-muted: #a0a0a5;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 body {
   background-color: var(--light-bg-page);
   color: var(--light-text-primary);
