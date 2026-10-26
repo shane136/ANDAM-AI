@@ -1,42 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { Header } from './components/Header';
-import { ChatAssistant } from './components/ChatAssistant';
-import { EmergencyHotlines } from './components/EmergencyHotlines';
-import { BarangayHazardExplorer } from './components/BarangayHazardExplorer';
-import { DisasterGuides } from './components/DisasterGuides';
-import { GoBagChecklist } from './components/GoBagChecklist';
-import { OfficialSources } from './components/OfficialSources';
-import { Language, Theme } from './types';
-import { ShieldAlert, PhoneCall, X, AlertOctagon } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Header } from "./components/Header";
+import { ChatAssistant } from "./components/ChatAssistant";
+import { EmergencyHotlines } from "./components/EmergencyHotlines";
+import { BarangayHazardExplorer } from "./components/BarangayHazardExplorer";
+import { DisasterGuides } from "./components/DisasterGuides";
+import { GoBagChecklist } from "./components/GoBagChecklist";
+import { OfficialSources } from "./components/OfficialSources";
+import { Language, Theme } from "./types";
+import { ShieldAlert, PhoneCall, X, AlertOctagon } from "lucide-react";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<string>('chat');
-  const [language, setLanguage] = useState<Language>('ceb');
+  const [activeTab, setActiveTab] = useState<string>("chat");
+  const [language, setLanguage] = useState<Language>("ceb");
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('iligan_drrm_theme');
-    if (saved === 'dark' || saved === 'light') return saved;
-    return 'light';
+    const saved = localStorage.getItem("iligan_drrm_theme");
+    if (saved === "dark" || saved === "light") return saved;
+    return "light";
   });
-  const [selectedBarangay, setSelectedBarangay] = useState<string>('Hinaplanon');
+  const [selectedBarangay, setSelectedBarangay] =
+    useState<string>("Hinaplanon");
   const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
+    if (theme === "dark") {
+      root.classList.add("dark");
     } else {
-      root.classList.remove('dark');
+      root.classList.remove("dark");
     }
-    localStorage.setItem('iligan_drrm_theme', theme);
+    localStorage.setItem("iligan_drrm_theme", theme);
   }, [theme]);
 
   const handleAskChatbotAboutBarangay = (bName: string) => {
     setSelectedBarangay(bName);
-    setActiveTab('chat');
+    setActiveTab("chat");
   };
 
   return (
-    <div className="h-screen h-[100dvh] bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200 antialiased overflow-hidden">
+    <div className="min-h-screen bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200 antialiased">
       {/* Top Navigation Header */}
       <Header
         activeTab={activeTab}
@@ -49,65 +50,53 @@ export default function App() {
       />
 
       {/* Main Content Viewport */}
-       <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-2 sm:py-3 flex flex-col overflow-hidden">
-        {activeTab === 'chat' && (
-        {activeTab === 'chat' && (
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 flex flex-col">
+        {activeTab === "chat" && (
           <ChatAssistant
             language={language}
-            onNavigateToHotlines={() => setActiveTab('hotlines')}
-            onNavigateToGoBag={() => setActiveTab('gobag')}
+            onNavigateToHotlines={() => setActiveTab("hotlines")}
+            onNavigateToGoBag={() => setActiveTab("gobag")}
             selectedBarangay={selectedBarangay}
             setSelectedBarangay={setSelectedBarangay}
           />
         )}
-        {activeTab === 'hotlines' && (
-          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
-            <EmergencyHotlines language={language} />
-          </div>
-        )}
-          
-        {activeTab === 'barangays' && (
-          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
-            <BarangayHazardExplorer
+
+        {activeTab === "hotlines" && <EmergencyHotlines language={language} />}
+
+        {activeTab === "barangays" && (
+          <BarangayHazardExplorer
             language={language}
             selectedBarangay={selectedBarangay}
             setSelectedBarangay={setSelectedBarangay}
             onAskChatbotAboutBarangay={handleAskChatbotAboutBarangay}
           />
-          </div>
         )}
 
-         {activeTab === 'guides' && (
-          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
-            <DisasterGuides language={language} />
-          </div>
-        )}
+        {activeTab === "guides" && <DisasterGuides language={language} />}
 
-        {activeTab === 'gobag' && (
-          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
-            <GoBagChecklist language={language} />
-          </div>
-        )}
+        {activeTab === "gobag" && <GoBagChecklist language={language} />}
 
-        {activeTab === 'sources' && (
-          <div className="flex-1 min-h-0 overflow-y-auto pr-1">
-            <OfficialSources language={language} />
-          </div>
-        )}
+        {activeTab === "sources" && <OfficialSources language={language} />}
       </main>
 
-       {/* Footer (Permanently fixed to viewport bottom) */}
-      <footer className="shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 py-2.5 sm:py-3 px-4 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      {/* Footer */}
+      <footer className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 py-4 px-4 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>
-              © 2026 <strong className="text-slate-800 dark:text-slate-200 font-semibold">ANDAM AI</strong> • Disaster Risk Reduction & Management Hub
+              © 2026{" "}
+              <strong className="text-slate-800 dark:text-slate-200 font-semibold">
+                ANDAM AI
+              </strong>{" "}
+              • Disaster Risk Reduction & Management Hub
             </span>
           </div>
           <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400">
             <span>Verified Sources:</span>
-            <span className="font-semibold text-slate-700 dark:text-slate-300">CDRRMO • DOST-PAGASA • PHIVOLCS</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-300">
+              CDRRMO • DOST-PAGASA • PHIVOLCS
+            </span>
           </div>
         </div>
       </footer>
@@ -131,21 +120,35 @@ export default function App() {
                 <h3 className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400 uppercase tracking-tight">
                   ACTIVE EMERGENCY IN ILIGAN CITY?
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Prioritize immediate physical safety and life-preservation!</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Prioritize immediate physical safety and life-preservation!
+                </p>
               </div>
             </div>
 
             <div className="bg-red-50/80 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 p-4 rounded-2xl space-y-2 text-xs">
-              <strong className="font-mono text-[10px] uppercase tracking-widest text-red-700 dark:text-red-400 block font-bold">CRITICAL SAFETY PROTOCOLS:</strong>
+              <strong className="font-mono text-[10px] uppercase tracking-widest text-red-700 dark:text-red-400 block font-bold">
+                CRITICAL SAFETY PROTOCOLS:
+              </strong>
               <ul className="list-disc pl-4 space-y-1 text-slate-700 dark:text-slate-300 leading-relaxed">
-                <li>Kung paspas ang pag-saka sa tubig-baha, mobakwit dayon padulong sa mas taas nga dapit o evacuation center.</li>
-                <li>Dala-a ang mga bata, tigulang, ug sakop sa pamilya nga kinahanglan og espesyal nga tabang.</li>
-                <li>Ayaw gyud pagluwas sa kusog nga sulog o paglusong sa baha.</li>
+                <li>
+                  Kung paspas ang pag-saka sa tubig-baha, mobakwit dayon
+                  padulong sa mas taas nga dapit o evacuation center.
+                </li>
+                <li>
+                  Dala-a ang mga bata, tigulang, ug sakop sa pamilya nga
+                  kinahanglan og espesyal nga tabang.
+                </li>
+                <li>
+                  Ayaw gyud pagluwas sa kusog nga sulog o paglusong sa baha.
+                </li>
               </ul>
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 block font-semibold">ICDRRMD 24/7 Hotline Numbers:</span>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 block font-semibold">
+                ICDRRMD 24/7 Hotline Numbers:
+              </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 font-mono font-bold text-xs">
                 <a
                   href="tel:0632218459"
@@ -175,7 +178,7 @@ export default function App() {
               <button
                 onClick={() => {
                   setShowEmergencyModal(false);
-                  setActiveTab('chat');
+                  setActiveTab("chat");
                 }}
                 className="w-full bg-slate-900 hover:bg-slate-800 text-white dark:bg-blue-600 dark:hover:bg-blue-700 font-semibold text-xs tracking-wide py-3 rounded-xl transition shadow-md cursor-pointer"
               >
