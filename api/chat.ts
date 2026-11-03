@@ -40,6 +40,14 @@ function localFallback(
   const weatherQuery = ["weather", "panahon", "ulan", "rain", "pagasa", "today", "tonight"]
     .some((term) => normalizedQuery.includes(term));
 
+  // Safety steps must win over everything else, even if the message also mentions weather
+  if (isEmergency || ["help", "tabang", "rescue", "emergency", "hotline", "baha"]
+    .some((term) => normalizedQuery.includes(term))) {
+    return language === "ceb"
+      ? "🚨 **BALHIN DAYON SA LUWAS UG TAAS NGA DAPIT.** Ayaw paglusong sa kusog nga baha. Tawag sa **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**."
+      : "🚨 **MOVE TO A SAFE, HIGHER LOCATION NOW.** Do not enter moving floodwater. Call **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.";
+  }
+
   if (weatherQuery && weather) {
     if (language === "ceb") {
       return `**Iligan City Weather Update:**\n\n- **Temperatura:** ${weather.temperature}°C (Mabatyagan: ${weather.apparentTemperature}°C)\n- **Kahimtang:** ${weather.conditionLabel.ceb}\n- **Tsansa sa ulan karong adlawa:** ${weather.rainChanceToday}%\n- **Tsansa sa ulan karong gabii:** ${weather.rainChanceTonight}%\n\nSource: ${weather.source}`;
@@ -48,13 +56,6 @@ function localFallback(
       return `**Ulat ng Panahon sa Iligan City:**\n\n- **Temperatura:** ${weather.temperature}°C (Pakiramdam: ${weather.apparentTemperature}°C)\n- **Kondisyon:** ${weather.conditionLabel.fil}\n- **Tsansa ng ulan ngayong araw:** ${weather.rainChanceToday}%\n- **Tsansa ng ulan ngayong gabi:** ${weather.rainChanceTonight}%\n\nSource: ${weather.source}`;
     }
     return `**Iligan City Weather Update:**\n\n- **Temperature:** ${weather.temperature}°C (Feels like ${weather.apparentTemperature}°C)\n- **Condition:** ${weather.conditionLabel.en}\n- **Rain chance today:** ${weather.rainChanceToday}%\n- **Rain chance tonight:** ${weather.rainChanceTonight}%\n\nSource: ${weather.source}`;
-  }
-
-  if (isEmergency || ["help", "tabang", "rescue", "emergency", "hotline", "baha"]
-    .some((term) => normalizedQuery.includes(term))) {
-    return language === "ceb"
-      ? "🚨 **BALHIN DAYON SA LUWAS UG TAAS NGA DAPIT.** Ayaw paglusong sa kusog nga baha. Tawag sa **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**."
-      : "🚨 **MOVE TO A SAFE, HIGHER LOCATION NOW.** Do not enter moving floodwater. Call **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.";
   }
 
   if (weatherQuery) {
