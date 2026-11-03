@@ -37,12 +37,23 @@ function localFallback(
   weather?: Awaited<ReturnType<typeof fetchIliganRealtimeWeather>>,
 ) {
   const normalizedQuery = query.toLowerCase();
-  const weatherQuery = ["weather", "panahon", "ulan", "rain", "pagasa", "today", "tonight"]
-    .some((term) => normalizedQuery.includes(term));
+  const weatherQuery = [
+    "weather",
+    "panahon",
+    "ulan",
+    "rain",
+    "pagasa",
+    "today",
+    "tonight",
+  ].some((term) => normalizedQuery.includes(term));
 
   // Safety steps must win over everything else, even if the message also mentions weather
-  if (isEmergency || ["help", "tabang", "rescue", "emergency", "hotline", "baha"]
-    .some((term) => normalizedQuery.includes(term))) {
+  if (
+    isEmergency ||
+    ["help", "tabang", "rescue", "emergency", "hotline", "baha"].some((term) =>
+      normalizedQuery.includes(term),
+    )
+  ) {
     return language === "ceb"
       ? "🚨 **BALHIN DAYON SA LUWAS UG TAAS NGA DAPIT.** Ayaw paglusong sa kusog nga baha. Tawag sa **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**."
       : "🚨 **MOVE TO A SAFE, HIGHER LOCATION NOW.** Do not enter moving floodwater. Call **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.";
@@ -66,14 +77,17 @@ function localFallback(
         : "I don't have current weather data right now. Please check DOST-PAGASA (https://www.pagasa.dost.gov.ph/) and ICDRRMD (https://www.facebook.com/drrmoiligancity).";
   }
 
-  const barangay = ILIGAN_BARANGAYS.find((item) =>
-    normalizedQuery.includes(item.name.toLowerCase()) ||
-    item.name.toLowerCase() === barangayName?.toLowerCase(),
+  const barangay = ILIGAN_BARANGAYS.find(
+    (item) =>
+      normalizedQuery.includes(item.name.toLowerCase()) ||
+      item.name.toLowerCase() === barangayName?.toLowerCase(),
   );
 
   if (barangay) {
     const risk = barangay.keyRiskNotes[language] || barangay.keyRiskNotes.en;
-    const centres = barangay.evacuationCentres?.join(", ") || "Confirm with the barangay DRRM office";
+    const centres =
+      barangay.evacuationCentres?.join(", ") ||
+      "Confirm with the barangay DRRM office";
     return `**Barangay ${barangay.name} Safety Profile:**\n\n- **Hazards:** ${barangay.hazards.join(", ")}\n- **Risk note:** ${risk}\n- **Evacuation centres:** ${centres}\n- **Local contact:** ${barangay.contactPersonOrOffice || "Barangay DRRM office"}`;
   }
 
@@ -84,12 +98,18 @@ function localFallback(
       : "I am ANDAM AI. I can help with Iligan City disaster safety, barangay risks, weather, Go-Bag preparation, and emergency hotlines. What would you like to know?";
 }
 
-async function generateWithFallback(ai: GoogleGenAI, params: Record<string, unknown>) {
+async function generateWithFallback(
+  ai: GoogleGenAI,
+  params: Record<string, unknown>,
+) {
   let lastError: unknown;
 
   for (const model of CANDIDATE_MODELS) {
     try {
-      const response = await ai.models.generateContent({ ...params, model } as never);
+      const response = await ai.models.generateContent({
+        ...params,
+        model,
+      } as never);
       if (response.text) return response.text;
     } catch (error) {
       lastError = error;
@@ -111,28 +131,44 @@ export default {
 
     let body: ChatBody;
     try {
-      body = await request.json() as ChatBody;
+      body = (await request.json()) as ChatBody;
     } catch {
-      return Response.json({ error: "Request body must be valid JSON." }, { status: 400 });
+      return Response.json(
+        { error: "Request body must be valid JSON." },
+        { status: 400 },
+      );
     }
 
     const messages = body.messages;
-    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 50) {
-      return Response.json({ error: "Messages must contain between 1 and 50 items." }, { status: 400 });
+    if (
+      !Array.isArray(messages) ||
+      messages.length === 0 ||
+      messages.length > 50
+    ) {
+      return Response.json(
+        { error: "Messages must contain between 1 and 50 items." },
+        { status: 400 },
+      );
     }
 
-    const validMessages = messages.every((message) =>
-      (message.role === "user" || message.role === "assistant") &&
-      typeof message.content === "string" &&
-      message.content.trim().length > 0 &&
-      message.content.length <= 10_000,
+    const validMessages = messages.every(
+      (message) =>
+        (message.role === "user" || message.role === "assistant") &&
+        typeof message.content === "string" &&
+        message.content.trim().length > 0 &&
+        message.content.length <= 10_000,
     );
     if (!validMessages) {
-      return Response.json({ error: "Each message must have a valid role and content." }, { status: 400 });
+      return Response.json(
+        { error: "Each message must have a valid role and content." },
+        { status: 400 },
+      );
     }
 
-    const language: Language = ["ceb", "fil", "en"].includes(body.userLanguage || "")
-      ? body.userLanguage as Language
+    const language: Language = ["ceb", "fil", "en"].includes(
+      body.userLanguage || "",
+    )
+      ? (body.userLanguage as Language)
       : "ceb";
     const latestMessage = messages[messages.length - 1].content;
     const weather = await fetchIliganRealtimeWeather().catch((error) => {
@@ -145,8 +181,11 @@ export default {
       if (!apiKey) throw new Error("GEMINI_API_KEY is not configured.");
 
       let systemInstruction = `${ILIGAN_DRRM_SYSTEM_INSTRUCTION}\nRESPONSE LANGUAGE: ${language}. Reply entirely in the selected response language, even when the user's message or prior chat history uses a different language.`;
-      if (body.barangay) systemInstruction += `\nUSER LOCATION: Barangay ${body.barangay}, Iligan City.`;
-      if (body.isEmergency) systemInstruction += "\nACTIVE EMERGENCY: Give immediate safety steps and ICDRRMO hotlines first.";
+      if (body.barangay)
+        systemInstruction += `\nUSER LOCATION: Barangay ${body.barangay}, Iligan City.`;
+      if (body.isEmergency)
+        systemInstruction +=
+          "\nACTIVE EMERGENCY: Give immediate safety steps and ICDRRMO hotlines first.";
       systemInstruction += weather
         ? `\nWEATHER CONTEXT (${weather.timestamp}): ${JSON.stringify(weather)}\nThis is automated forecast-model data from Open-Meteo, not a DOST-PAGASA bulletin. Credit it to Open-Meteo, never present it as coming from DOST-PAGASA, and tell users to check DOST-PAGASA for official forecasts and warnings.`
         : "\nWEATHER DATA UNAVAILABLE: You have no current weather data. Do not state or estimate current conditions, temperatures, or rain chances. Say the data is unavailable and direct users to DOST-PAGASA and ICDRRMD.";
@@ -162,11 +201,24 @@ export default {
         },
       });
 
-      return Response.json({ text, timestamp: new Date().toISOString(), sources: SOURCES });
-    } catch (error) {
-      console.error("Gemini unavailable; returning local DRRM response:", error);
       return Response.json({
-        text: localFallback(latestMessage, language, body.barangay, body.isEmergency, weather),
+        text,
+        timestamp: new Date().toISOString(),
+        sources: SOURCES,
+      });
+    } catch (error) {
+      console.error(
+        "Gemini unavailable; returning local DRRM response:",
+        error,
+      );
+      return Response.json({
+        text: localFallback(
+          latestMessage,
+          language,
+          body.barangay,
+          body.isEmergency,
+          weather,
+        ),
         timestamp: new Date().toISOString(),
         sources: SOURCES,
         fallback: true,
