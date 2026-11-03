@@ -77,7 +77,7 @@ export interface WeatherData {
     fil: string;
     en: string;
   };
-  pagasaSynopsis: {
+  safetyNote: {
     ceb: string;
     fil: string;
     en: string;
@@ -88,15 +88,4 @@ export interface WeatherData {
   rainChanceTonight: number;
   precipitationSum: number;
   source: string;
-}
-
-export interface AdvisoryItem {
-  id: string;
-  title: string;
-  agency: 'ILIGAN_ICDRRMD' | 'ILIGAN_CDRRMO' | 'PAGASA' | 'PHIVOLCS' | 'ILIGAN_LGU';
-  type: 'weather' | 'earthquake' | 'flood' | 'general';
-  level: 'info' | 'advisory' | 'warning' | 'critical';
-  content: string;
-  date: string;
-  link?: string;
 }

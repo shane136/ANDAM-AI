@@ -1,6 +1,6 @@
 import React from 'react';
-import { ExternalLink, ShieldCheck, Radio, AlertCircle, Globe } from 'lucide-react';
-import { OFFICIAL_SOURCES, SAMPLE_ADVISORIES } from '../constants/iliganData';
+import { ExternalLink, ShieldCheck, AlertCircle, Globe } from 'lucide-react';
+import { OFFICIAL_SOURCES } from '../constants/iliganData';
 import { Language } from '../types';
 
 interface OfficialSourcesProps {
@@ -31,43 +31,25 @@ export const OfficialSources: React.FC<OfficialSourcesProps> = ({ language }) =>
         </div>
       </div>
 
-      {/* Advisories Feed */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5 shadow-sm transition-colors">
+      {/* The app has no live bulletin feed, so send people to the agencies directly */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-3 shadow-sm transition-colors">
         <h3 className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider flex items-center gap-2">
-          <Radio className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-pulse" />
-          <span>Official DRRM Bulletins & Weather Advisories</span>
+          <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <span>
+            {language === 'ceb'
+              ? 'Mga Bulletin ug Weather Advisory'
+              : language === 'fil'
+              ? 'Mga Bulletin at Weather Advisory'
+              : 'Bulletins & Weather Advisories'}
+          </span>
         </h3>
-
-        <div className="space-y-3.5">
-          {SAMPLE_ADVISORIES.map((adv) => (
-            <div
-              key={adv.id}
-              className="bg-slate-50 dark:bg-slate-950/60 p-4 sm:p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 space-y-2.5 hover:border-blue-500/50 transition shadow-2xs"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/50 font-mono text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full font-bold">
-                  {adv.agency}
-                </span>
-                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">{adv.date}</span>
-              </div>
-
-              <h4 className="text-base font-bold text-slate-900 dark:text-white">{adv.title}</h4>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{adv.content}</p>
-
-              {adv.link && (
-                <a
-                  href={adv.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline pt-1"
-                >
-                  <span>Verify at official portal</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
+        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          {language === 'ceb'
+            ? 'Ang ANDAM AI wala magpakita og live nga bulletin gikan sa gobyerno. Para sa pinakabag-ong pahibalo ug advisory, susiha ang mga opisyal nga tuburan sa ubos.'
+            : language === 'fil'
+            ? 'Hindi nagpapakita ang ANDAM AI ng live na bulletin mula sa gobyerno. Para sa pinakabagong babala at advisory, tingnan ang mga opisyal na pinagmulan sa ibaba.'
+            : 'ANDAM AI does not show live government bulletins. For current warnings and advisories, check the official sources below.'}
+        </p>
       </div>
 
       {/* Primary Verified Web Portals */}

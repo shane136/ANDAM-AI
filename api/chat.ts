@@ -57,6 +57,14 @@ function localFallback(
       : "🚨 **MOVE TO A SAFE, HIGHER LOCATION NOW.** Do not enter moving floodwater. Call **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.";
   }
 
+  if (weatherQuery) {
+    return language === "ceb"
+      ? "Wala koy bag-ong weather data karon. Palihog susiha ang DOST-PAGASA (https://www.pagasa.dost.gov.ph/) ug ang ICDRRMD (https://www.facebook.com/drrmoiligancity)."
+      : language === "fil"
+        ? "Wala akong bagong weather data ngayon. Pakitingnan ang DOST-PAGASA (https://www.pagasa.dost.gov.ph/) at ang ICDRRMD (https://www.facebook.com/drrmoiligancity)."
+        : "I don't have current weather data right now. Please check DOST-PAGASA (https://www.pagasa.dost.gov.ph/) and ICDRRMD (https://www.facebook.com/drrmoiligancity).";
+  }
+
   const barangay = ILIGAN_BARANGAYS.find((item) =>
     normalizedQuery.includes(item.name.toLowerCase()) ||
     item.name.toLowerCase() === barangayName?.toLowerCase(),
@@ -138,7 +146,9 @@ export default {
       let systemInstruction = `${ILIGAN_DRRM_SYSTEM_INSTRUCTION}\nRESPONSE LANGUAGE: ${language}. Reply entirely in the selected response language, even when the user's message or prior chat history uses a different language.`;
       if (body.barangay) systemInstruction += `\nUSER LOCATION: Barangay ${body.barangay}, Iligan City.`;
       if (body.isEmergency) systemInstruction += "\nACTIVE EMERGENCY: Give immediate safety steps and ICDRRMO hotlines first.";
-      if (weather) systemInstruction += `\nWEATHER CONTEXT (${weather.timestamp}): ${JSON.stringify(weather)}`;
+      systemInstruction += weather
+        ? `\nWEATHER CONTEXT (${weather.timestamp}): ${JSON.stringify(weather)}\nThis is automated forecast-model data from Open-Meteo, not a DOST-PAGASA bulletin. Credit it to Open-Meteo, never present it as coming from DOST-PAGASA, and tell users to check DOST-PAGASA for official forecasts and warnings.`
+        : "\nWEATHER DATA UNAVAILABLE: You have no current weather data. Do not state or estimate current conditions, temperatures, or rain chances. Say the data is unavailable and direct users to DOST-PAGASA and ICDRRMD.";
 
       const text = await generateWithFallback(new GoogleGenAI({ apiKey }), {
         contents: messages.map((message) => ({

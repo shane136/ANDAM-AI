@@ -152,11 +152,11 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     },
     {
       label: {
-        ceb: '⛅ Weather Today / Tonight (DOST-PAGASA)',
-        fil: '⛅ Panahon Ngayon at Mamayang Gabi (PAGASA)',
-        en: '⛅ Weather Today & Tonight (DOST-PAGASA)',
+        ceb: '⛅ Weather Today / Tonight',
+        fil: '⛅ Panahon Ngayon at Mamayang Gabi',
+        en: '⛅ Weather Today & Tonight',
       },
-      prompt: 'What is the weather today or tonight in Iligan City according to DOST-PAGASA?',
+      prompt: 'What is the weather today or tonight in Iligan City?',
       emergency: false,
     },
     {
@@ -634,7 +634,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           <div className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 p-4 rounded-2xl max-w-md shadow-xs">
             <RefreshCw className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
             <div className="text-xs font-mono uppercase tracking-wider font-semibold">
-              Retrieving verified data from CDRRMO, PAGASA & PHIVOLCS...
+              Preparing your answer...
             </div>
           </div>
         )}
