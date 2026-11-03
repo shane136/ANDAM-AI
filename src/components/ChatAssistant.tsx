@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-import { useMutation } from '@tanstack/react-query';
+import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
 import {
   Send,
   ShieldAlert,
@@ -19,11 +19,11 @@ import {
   AlertTriangle,
   ExternalLink,
   ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import { ChatMessage, Language } from '../types';
-import { ILIGAN_BARANGAYS } from '../constants/iliganData';
-import { useTextToSpeech } from '../hooks/useTextToSpeech';
+  ChevronRight,
+} from "lucide-react";
+import { ChatMessage, Language } from "../types";
+import { ILIGAN_BARANGAYS } from "../constants/iliganData";
+import { useTextToSpeech } from "../hooks/useTextToSpeech";
 
 interface ChatAssistantProps {
   language: Language;
@@ -37,19 +37,19 @@ interface ChatApiResponse {
   text?: string;
   fallbackReply?: string;
   fallback?: boolean;
-  sources?: ChatMessage['sources'];
+  sources?: ChatMessage["sources"];
 }
 
 interface ChatApiRequest {
-  messages: { role: ChatMessage['sender']; content: string }[];
+  messages: { role: ChatMessage["sender"]; content: string }[];
   userLanguage: Language;
   isEmergency: boolean;
   barangay: string;
 }
 
 async function postChatMessage(payload: ChatApiRequest) {
-  const { data } = await axios.post<ChatApiResponse>('/api/chat', payload, {
-    headers: { 'Content-Type': 'application/json' },
+  const { data } = await axios.post<ChatApiResponse>("/api/chat", payload, {
+    headers: { "Content-Type": "application/json" },
     timeout: 60_000,
   });
   return data;
@@ -57,19 +57,23 @@ async function postChatMessage(payload: ChatApiRequest) {
 
 function createWelcomeMessage(language: Language): ChatMessage {
   return {
-    id: 'welcome-1',
-    sender: 'assistant',
-    text: language === 'ceb'
-      ? 'Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?'
-      : language === 'fil'
-      ? 'Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan ICDRRMD, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?'
-      : 'Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan ICDRRMD, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?',
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    id: "welcome-1",
+    sender: "assistant",
+    text:
+      language === "ceb"
+        ? "Maayong adlaw! Ako ang **Iligan City DRRM Assistant**. Makatabang ako kanimo bahin sa safety guides, pagpangandam sa bagyo o linog, ug impormasyon gikan sa **Iligan ICDRRMD, DOST-PAGASA, ug DOST-PHIVOLCS**.\n\nUnsa man ang akong ikaalagad kanimo karon?"
+        : language === "fil"
+          ? "Magandang araw! Ako ang **Iligan City DRRM Assistant**. Makatutulong ako sa iyo sa mga gabay sa kaligtasan, paghahanda sa bagyo o lindol, at opisyal na impormasyon mula sa **Iligan ICDRRMD, DOST-PAGASA, at DOST-PHIVOLCS**.\n\nAno ang maipaglilingkod ko sa iyo ngayon?"
+          : "Welcome! I am the **Iligan City DRRM Assistant**. I can assist you with disaster safety guides, weather advisories, earthquake safety, and official guidance from **Iligan ICDRRMD, DOST-PAGASA, and DOST-PHIVOLCS**.\n\nHow can I help you today?",
+    timestamp: new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
     language,
     sources: [
-      { name: 'Iligan City LGU / ICDRRMD', url: 'https://iligan.gov.ph/' },
-      { name: 'DOST-PAGASA', url: 'https://www.pagasa.dost.gov.ph/' },
-      { name: 'DOST-PHIVOLCS', url: 'https://www.phivolcs.dost.gov.ph/' },
+      { name: "Iligan City LGU / ICDRRMD", url: "https://iligan.gov.ph/" },
+      { name: "DOST-PAGASA", url: "https://www.pagasa.dost.gov.ph/" },
+      { name: "DOST-PHIVOLCS", url: "https://www.phivolcs.dost.gov.ph/" },
     ],
   };
 }
@@ -81,9 +85,11 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   selectedBarangay,
   setSelectedBarangay,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [createWelcomeMessage(language)]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
+    createWelcomeMessage(language),
+  ]);
 
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isEmergencyMode, setIsEmergencyMode] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -108,12 +114,12 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const quickQueriesRef = useRef<HTMLDivElement>(null);
 
-  const scrollQuickQueries = (direction: 'left' | 'right') => {
+  const scrollQuickQueries = (direction: "left" | "right") => {
     if (quickQueriesRef.current) {
       const scrollAmount = 240;
       quickQueriesRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
       });
     }
   };
@@ -125,7 +131,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -134,70 +140,80 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
   useEffect(() => {
     stopAudio();
-    setMessages((previousMessages) => previousMessages.map((message) =>
-      message.id === 'welcome-1' ? createWelcomeMessage(language) : message
-    ));
+    setMessages((previousMessages) =>
+      previousMessages.map((message) =>
+        message.id === "welcome-1" ? createWelcomeMessage(language) : message,
+      ),
+    );
   }, [language, stopAudio]);
 
   // Preset Chips
   const presetChips = [
     {
       label: {
-        ceb: '🚨 ACTIVE EMERGENCY: Paspas nga Baha!',
-        fil: '🚨 ACTIVE EMERGENCY: Mabilis na Baha!',
-        en: '🚨 ACTIVE EMERGENCY: Rapid Flooding!',
+        ceb: "🚨 ACTIVE EMERGENCY: Paspas nga Baha!",
+        fil: "🚨 ACTIVE EMERGENCY: Mabilis na Baha!",
+        en: "🚨 ACTIVE EMERGENCY: Rapid Flooding!",
       },
-      prompt: '🚨 EMERGENCY ALERT: Nagbaha na diri sa amoa sa Iligan City ug paspas nga mosaka ang tubig! Unsa akong dapat buhaton dayon?',
+      prompt:
+        "🚨 EMERGENCY ALERT: Nagbaha na diri sa amoa sa Iligan City ug paspas nga mosaka ang tubig! Unsa akong dapat buhaton dayon?",
       emergency: true,
     },
     {
       label: {
-        ceb: '⛅ Weather Today / Tonight (DOST-PAGASA)',
-        fil: '⛅ Panahon Ngayon at Mamayang Gabi (PAGASA)',
-        en: '⛅ Weather Today & Tonight (DOST-PAGASA)',
+        ceb: "⛅ Weather Today / Tonight",
+        fil: "⛅ Panahon Ngayon at Mamayang Gabi",
+        en: "⛅ Weather Today & Tonight",
       },
-      prompt: 'What is the weather today or tonight in Iligan City according to DOST-PAGASA?',
+      prompt: "What is the weather today or tonight in Iligan City?",
       emergency: false,
     },
     {
       label: {
-        ceb: '📞 Official Iligan Emergency Hotlines',
-        fil: '📞 Opisyal na Emergency Hotlines',
-        en: '📞 Official Emergency Hotlines',
+        ceb: "📞 Official Iligan Emergency Hotlines",
+        fil: "📞 Opisyal na Emergency Hotlines",
+        en: "📞 Official Emergency Hotlines",
       },
-      prompt: 'Unsa ang mga opisyal nga hotline numbers sa Iligan City CDRRMO Rescue, BFP, ug Police?',
+      prompt:
+        "Unsa ang mga opisyal nga hotline numbers sa Iligan City CDRRMO Rescue, BFP, ug Police?",
       emergency: false,
     },
     {
       label: {
-        ceb: '🌊 Mandulog River & Flood Safety',
-        fil: '🌊 Mandulog River at Baha Safety',
-        en: '🌊 Mandulog River & Flood Risk',
+        ceb: "🌊 Mandulog River & Flood Safety",
+        fil: "🌊 Mandulog River at Baha Safety",
+        en: "🌊 Mandulog River & Flood Risk",
       },
-      prompt: 'Unsa ang dapat buhaton kung magpahilo ang Iligan CDRRMO bahin sa Mandulog River water level?',
+      prompt:
+        "Unsa ang dapat buhaton kung magpahilo ang Iligan CDRRMO bahin sa Mandulog River water level?",
       emergency: false,
     },
     {
       label: {
-        ceb: '🏚️ Linog Safety (Drop, Cover, Hold)',
-        fil: '🏚️ Lindol Safety (Drop, Cover, Hold)',
-        en: '🏚️ Earthquake Safety Steps',
+        ceb: "🏚️ Linog Safety (Drop, Cover, Hold)",
+        fil: "🏚️ Lindol Safety (Drop, Cover, Hold)",
+        en: "🏚️ Earthquake Safety Steps",
       },
-      prompt: 'Unsa ang Drop, Cover, ug Hold kung makasinati og kusog nga linog sa Iligan City?',
+      prompt:
+        "Unsa ang Drop, Cover, ug Hold kung makasinati og kusog nga linog sa Iligan City?",
       emergency: false,
     },
     {
       label: {
-        ceb: '🎒 Unsaon pag-andam sa Family Go-Bag?',
-        fil: '🎒 Paano maghanda ng Family Go-Bag?',
-        en: '🎒 How to pack a Family Go-Bag?',
+        ceb: "🎒 Unsaon pag-andam sa Family Go-Bag?",
+        fil: "🎒 Paano maghanda ng Family Go-Bag?",
+        en: "🎒 How to pack a Family Go-Bag?",
       },
-      prompt: 'Unsa ang mga pinaka-importante nga dapat isulod sa Family Emergency Go-Bag para sa matag pamilya sa Iligan?',
+      prompt:
+        "Unsa ang mga pinaka-importante nga dapat isulod sa Family Emergency Go-Bag para sa matag pamilya sa Iligan?",
       emergency: false,
     },
   ];
 
-  const handleSend = async (customPrompt?: string, isEmergencyTrigger = false) => {
+  const handleSend = async (
+    customPrompt?: string,
+    isEmergencyTrigger = false,
+  ) => {
     const textToSend = customPrompt || input;
     if (!textToSend.trim()) return;
 
@@ -206,15 +222,18 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
-      sender: 'user',
+      sender: "user",
       text: textToSend,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
       language,
       isEmergency: isEmergencyTrigger || isEmergencyMode,
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    setInput('');
+    setInput("");
 
     try {
       // Build previous message chain for API context
@@ -232,19 +251,29 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
       const assistantReply: ChatMessage = {
         id: `assistant-${Date.now()}`,
-        sender: 'assistant',
-        text: data.text || data.fallbackReply || (
-          language === 'ceb'
-            ? '⚠️ Ang AI assistant adunay temporaryong kabusy o taas nga demand. Kun naa kay dinalian nga emerhensya, palihog tawag dayon sa **ICDRRMO Rescue: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.'
-            : language === 'fil'
-            ? '⚠️ Ang AI assistant ay may pansamantalang mataas na demand. Kung mayroon kang agarang emerhensya, mangyaring tumawag agad sa **ICDRRMO Rescue: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.'
-            : '⚠️ The AI assistant is currently experiencing high demand. If you have an urgent emergency, please call **ICDRRMO Rescue Hotline: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** immediately.'
-        ),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sender: "assistant",
+        text:
+          data.text ||
+          data.fallbackReply ||
+          (language === "ceb"
+            ? "⚠️ Ang AI assistant adunay temporaryong kabusy o taas nga demand. Kun naa kay dinalian nga emerhensya, palihog tawag dayon sa **ICDRRMO Rescue: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**."
+            : language === "fil"
+              ? "⚠️ Ang AI assistant ay may pansamantalang mataas na demand. Kung mayroon kang agarang emerhensya, mangyaring tumawag agad sa **ICDRRMO Rescue: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**."
+              : "⚠️ The AI assistant is currently experiencing high demand. If you have an urgent emergency, please call **ICDRRMO Rescue Hotline: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** immediately."),
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         language,
         sources: data.sources || [
-          { name: 'ICDRRMO Official Facebook Page', url: 'https://www.facebook.com/drrmoiligancity' },
-          { name: 'Iligan City Government Portal', url: 'https://iligan.gov.ph/' },
+          {
+            name: "ICDRRMO Official Facebook Page",
+            url: "https://www.facebook.com/drrmoiligancity",
+          },
+          {
+            name: "Iligan City Government Portal",
+            url: "https://iligan.gov.ph/",
+          },
         ],
         isEmergency: Boolean(data.fallbackReply),
       };
@@ -257,24 +286,29 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        const responseBody = typeof err.response?.data === 'string'
-          ? err.response.data.slice(0, 120)
-          : err.response?.data;
-        console.error('Error fetching chat response:', {
+        const responseBody =
+          typeof err.response?.data === "string"
+            ? err.response.data.slice(0, 120)
+            : err.response?.data;
+        console.error("Error fetching chat response:", {
           status: err.response?.status,
           message: err.message,
           response: responseBody,
         });
       } else {
-        console.error('Error fetching chat response:', err);
+        console.error("Error fetching chat response:", err);
       }
       const fallbackReply: ChatMessage = {
         id: `assistant-${Date.now()}`,
-        sender: 'assistant',
-        text: language === 'ceb'
-          ? '⚠️ Pasensya, naglisod ang koneksyon sa AI Assistant karon.\n\n**DINALIAN NGA PAHIBALO SA EMERHENSYA:**\nKun anaa ka sa peligro o baha sa Iligan City, palihog tawag dayon sa **ICDRRMO Rescue Hotlines: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** (Official FB: facebook.com/drrmoiligancity).'
-          : '⚠️ Unable to connect to DRRM AI server.\n\n**URGENT EMERGENCY ALERT:**\nIf you are in danger or facing flooding in Iligan City, call **ICDRRMO Rescue Hotlines: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** (Official FB: facebook.com/drrmoiligancity) immediately.',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        sender: "assistant",
+        text:
+          language === "ceb"
+            ? "⚠️ Pasensya, naglisod ang koneksyon sa AI Assistant karon.\n\n**DINALIAN NGA PAHIBALO SA EMERHENSYA:**\nKun anaa ka sa peligro o baha sa Iligan City, palihog tawag dayon sa **ICDRRMO Rescue Hotlines: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** (Official FB: facebook.com/drrmoiligancity)."
+            : "⚠️ Unable to connect to DRRM AI server.\n\n**URGENT EMERGENCY ALERT:**\nIf you are in danger or facing flooding in Iligan City, call **ICDRRMO Rescue Hotlines: (063) 221-8459 / 0997-726-2692 / 0969-233-7878** (Official FB: facebook.com/drrmoiligancity) immediately.",
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
         language,
         isEmergency: true,
       };
@@ -293,15 +327,23 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   const handleVoiceInput = () => {
     unlockAudio();
 
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert('Speech Recognition is not supported in this browser version. Please type your message.');
+    if (
+      !("webkitSpeechRecognition" in window) &&
+      !("SpeechRecognition" in window)
+    ) {
+      alert(
+        "Speech Recognition is not supported in this browser version. Please type your message.",
+      );
       return;
     }
 
     try {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const SpeechRecognition =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
-      recognition.lang = language === 'ceb' ? 'fil-PH' : language === 'fil' ? 'fil-PH' : 'en-US';
+      recognition.lang =
+        language === "ceb" ? "fil-PH" : language === "fil" ? "fil-PH" : "en-US";
       recognition.interimResults = false;
 
       recognition.onstart = () => setIsListening(true);
@@ -328,19 +370,26 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
   // Helper renderer to render basic markdown formatting
   const renderFormattedText = (text: string) => {
-    const lines = text.split('\n');
+    const lines = text.split("\n");
     return (
       <div className="space-y-1.5 text-sm leading-relaxed">
         {lines.map((line, idx) => {
           if (!line.trim()) return <div key={idx} className="h-1" />;
 
-          const isHeader = line.startsWith('###') || line.startsWith('##') || line.startsWith('#');
-          const isBullet = line.trim().startsWith('*') || line.trim().startsWith('-');
+          const isHeader =
+            line.startsWith("###") ||
+            line.startsWith("##") ||
+            line.startsWith("#");
+          const isBullet =
+            line.trim().startsWith("*") || line.trim().startsWith("-");
 
           if (isHeader) {
             return (
-              <h4 key={idx} className="font-bold text-amber-800 dark:text-amber-300 text-base mt-2 mb-1">
-                {line.replace(/^#+\s*/, '')}
+              <h4
+                key={idx}
+                className="font-bold text-amber-800 dark:text-amber-300 text-base mt-2 mb-1"
+              >
+                {line.replace(/^#+\s*/, "")}
               </h4>
             );
           }
@@ -348,12 +397,22 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           const parts = line.split(/(\*\*.*?\*\*)/g);
 
           return (
-            <p key={idx} className={`${isBullet ? 'pl-4 relative font-medium' : ''}`}>
-              {isBullet && <span className="absolute left-1 top-0 font-bold text-amber-600 dark:text-amber-400">•</span>}
+            <p
+              key={idx}
+              className={`${isBullet ? "pl-4 relative font-medium" : ""}`}
+            >
+              {isBullet && (
+                <span className="absolute left-1 top-0 font-bold text-amber-600 dark:text-amber-400">
+                  •
+                </span>
+              )}
               {parts.map((part, pIdx) => {
-                if (part.startsWith('**') && part.endsWith('**')) {
+                if (part.startsWith("**") && part.endsWith("**")) {
                   return (
-                    <strong key={pIdx} className="font-bold text-slate-950 dark:text-amber-200">
+                    <strong
+                      key={pIdx}
+                      className="font-bold text-slate-950 dark:text-amber-200"
+                    >
                       {part.slice(2, -2)}
                     </strong>
                   );
@@ -368,13 +427,15 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none my-1 min-h-[620px] transition-colors">
+    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none my-1 min-h-[390px] transition-colors">
       {/* Top Controls Bar */}
       <div className="bg-slate-50/90 dark:bg-slate-950/80 px-4 md:px-6 py-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
         {/* Barangay Selector */}
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Target Barangay:</span>
+          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            Target Barangay:
+          </span>
           <select
             value={selectedBarangay}
             onChange={(e) => setSelectedBarangay(e.target.value)}
@@ -409,20 +470,31 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
             onClick={() => toggleAutoVoice()}
             className={`px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition border cursor-pointer shadow-2xs ${
               isAutoVoiceEnabled
-                ? 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-700 font-semibold'
-                : 'bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                ? "bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-700 font-semibold"
+                : "bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"
             }`}
-            title={isAutoVoiceEnabled ? 'Auto Voice Output is enabled (Click to turn off)' : 'Auto Voice Output is off (Click to enable)'}
+            title={
+              isAutoVoiceEnabled
+                ? "Auto Voice Output is enabled (Click to turn off)"
+                : "Auto Voice Output is off (Click to enable)"
+            }
           >
             {isAutoVoiceEnabled ? (
               <>
                 <Volume2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-pulse" />
-                <span>Auto Voice: <strong className="text-blue-700 dark:text-blue-300 font-bold">ON</strong></span>
+                <span>
+                  Auto Voice:{" "}
+                  <strong className="text-blue-700 dark:text-blue-300 font-bold">
+                    ON
+                  </strong>
+                </span>
               </>
             ) : (
               <>
                 <VolumeX className="w-3.5 h-3.5 text-slate-400" />
-                <span>Auto Voice: <strong>OFF</strong></span>
+                <span>
+                  Auto Voice: <strong>OFF</strong>
+                </span>
               </>
             )}
           </button>
@@ -430,7 +502,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       </div>
 
       {/* Floating Active Voice Playback Controller Bar */}
-      {playbackState !== 'idle' && (
+      {playbackState !== "idle" && (
         <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white px-4 md:px-6 py-2.5 flex items-center justify-between gap-3 text-xs shadow-md border-b border-blue-500/30">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="flex items-center gap-1 bg-white/20 px-2 py-1 rounded-lg shrink-0">
@@ -441,7 +513,9 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
             </div>
             <div className="truncate">
               <span className="font-semibold tracking-wide">
-                {playbackState === 'playing' ? 'Voice Output Speaking...' : 'Voice Output Paused'}
+                {playbackState === "playing"
+                  ? "Voice Output Speaking..."
+                  : "Voice Output Paused"}
               </span>
               {progress.total > 1 && (
                 <span className="text-[10px] text-blue-100/90 font-mono ml-2 hidden sm:inline">
@@ -452,7 +526,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {playbackState === 'playing' ? (
+            {playbackState === "playing" ? (
               <button
                 onClick={pauseAudio}
                 className="bg-white/20 hover:bg-white/30 text-white px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 cursor-pointer text-xs font-semibold"
@@ -488,7 +562,10 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         <div className="bg-red-500/10 border-b border-red-500/20 px-5 py-2.5 text-xs text-red-700 dark:text-red-300 flex items-center justify-between font-sans">
           <div className="flex items-center gap-2 font-semibold animate-pulse">
             <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
-            <span>ACTIVE EMERGENCY MODE ENABLED: Responses prioritized for immediate life safety!</span>
+            <span>
+              ACTIVE EMERGENCY MODE ENABLED: Responses prioritized for immediate
+              life safety!
+            </span>
           </div>
           <button
             onClick={() => setIsEmergencyMode(false)}
@@ -500,24 +577,28 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       )}
 
       {/* Messages Scroll View */}
-      <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-950/40 min-h-[380px] transition-colors">
+      <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-950/40 min-h-0 transition-colors">
         {messages.map((msg) => {
-          const isUser = msg.sender === 'user';
-          const isCurrentSpeaking = activeMessageId === msg.id && playbackState === 'playing';
-          const isCurrentPaused = activeMessageId === msg.id && playbackState === 'paused';
+          const isUser = msg.sender === "user";
+          const isCurrentSpeaking =
+            activeMessageId === msg.id && playbackState === "playing";
+          const isCurrentPaused =
+            activeMessageId === msg.id && playbackState === "paused";
 
           return (
             <div
               key={msg.id}
-              className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full max-w-4xl ${
-                isUser ? 'ml-auto' : 'mr-auto'
+              className={`flex flex-col ${isUser ? "items-end" : "items-start"} w-full max-w-4xl ${
+                isUser ? "ml-auto" : "mr-auto"
               }`}
             >
               <div className="flex items-center gap-2 mb-1.5 px-1">
                 <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 font-mono">
-                  {isUser ? 'Resident' : 'DRRM Assistant'}
+                  {isUser ? "Resident" : "DRRM Assistant"}
                 </span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{msg.timestamp}</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                  {msg.timestamp}
+                </span>
                 {msg.isEmergency && (
                   <span className="bg-red-600 text-white font-extrabold text-[9px] px-2 py-0.5 rounded-full font-mono uppercase tracking-wider">
                     EMERGENCY
@@ -525,7 +606,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                 )}
                 {isCurrentSpeaking && (
                   <span className="bg-blue-600 text-white text-[9px] font-mono px-2 py-0.5 rounded-full uppercase tracking-wider font-bold flex items-center gap-1 animate-pulse">
-                    <span className="w-1 h-1 rounded-full bg-white animate-ping"></span> Speaking
+                    <span className="w-1 h-1 rounded-full bg-white animate-ping"></span>{" "}
+                    Speaking
                   </span>
                 )}
                 {isCurrentPaused && (
@@ -538,12 +620,12 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
               <div
                 className={`p-5 rounded-2xl relative group transition-all shadow-xs ${
                   isUser
-                    ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-xs max-w-[85%] text-sm leading-relaxed shadow-md shadow-blue-500/10'
+                    ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-tr-xs max-w-[85%] text-sm leading-relaxed shadow-md shadow-blue-500/10"
                     : msg.isEmergency
-                    ? 'bg-red-50/90 border border-red-300 text-slate-900 dark:bg-slate-900 dark:border-red-600/60 dark:text-slate-100 rounded-tl-xs max-w-[90%]'
-                    : isCurrentSpeaking
-                    ? 'bg-white border-2 border-blue-500/80 text-slate-800 dark:bg-slate-900 dark:border-blue-500/80 dark:text-slate-100 rounded-tl-xs max-w-[90%] ring-2 ring-blue-500/10'
-                    : 'bg-white border border-slate-200/90 text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 rounded-tl-xs max-w-[90%]'
+                      ? "bg-red-50/90 border border-red-300 text-slate-900 dark:bg-slate-900 dark:border-red-600/60 dark:text-slate-100 rounded-tl-xs max-w-[90%]"
+                      : isCurrentSpeaking
+                        ? "bg-white border-2 border-blue-500/80 text-slate-800 dark:bg-slate-900 dark:border-blue-500/80 dark:text-slate-100 rounded-tl-xs max-w-[90%] ring-2 ring-blue-500/10"
+                        : "bg-white border border-slate-200/90 text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 rounded-tl-xs max-w-[90%]"
                 }`}
               >
                 {!isUser && (
@@ -584,20 +666,26 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                 {!isUser && (
                   <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-90 sm:opacity-0 group-hover:opacity-100 transition">
                     <button
-                      onClick={() => togglePlayPauseMessage(msg.id, msg.text, msg.language || language)}
+                      onClick={() =>
+                        togglePlayPauseMessage(
+                          msg.id,
+                          msg.text,
+                          msg.language || language,
+                        )
+                      }
                       className={`p-1.5 rounded-lg border transition cursor-pointer flex items-center gap-1 text-xs font-medium ${
                         isCurrentSpeaking
-                          ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                          ? "bg-blue-600 text-white border-blue-600 shadow-xs"
                           : isCurrentPaused
-                          ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
-                          : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                            ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                            : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                       }`}
                       title={
                         isCurrentSpeaking
-                          ? 'Pause audio reading'
+                          ? "Pause audio reading"
                           : isCurrentPaused
-                          ? 'Resume audio reading'
-                          : 'Listen to response'
+                            ? "Resume audio reading"
+                            : "Listen to response"
                       }
                     >
                       {isCurrentSpeaking ? (
@@ -621,7 +709,11 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
                       className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer transition"
                       title="Copy message"
                     >
-                      {copiedId === msg.id ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copiedId === msg.id ? (
+                        <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      ) : (
+                        <Copy className="w-3.5 h-3.5" />
+                      )}
                     </button>
                   </div>
                 )}
@@ -634,7 +726,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           <div className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 p-4 rounded-2xl max-w-md shadow-xs">
             <RefreshCw className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
             <div className="text-xs font-mono uppercase tracking-wider font-semibold">
-              Retrieving verified data from CDRRMO, PAGASA & PHIVOLCS...
+              Preparing your answer...
             </div>
           </div>
         )}
@@ -646,7 +738,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       <div className="bg-slate-50 dark:bg-slate-900/90 px-3 sm:px-5 py-2.5 border-t border-slate-200/80 dark:border-slate-800 flex items-center gap-2 transition-colors">
         <button
           type="button"
-          onClick={() => scrollQuickQueries('left')}
+          onClick={() => scrollQuickQueries("left")}
           className="shrink-0 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer"
           title="Scroll quick queries left"
         >
@@ -659,7 +751,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           className="flex-1 overflow-x-auto scroll-smooth scrollbar-none flex items-center gap-2 py-0.5 max-w-full cursor-grab active:cursor-grabbing"
         >
           <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400 whitespace-nowrap flex items-center gap-1.5 mr-1 shrink-0 font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Quick Queries:
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />{" "}
+            Quick Queries:
           </span>
           {presetChips.map((chip, idx) => (
             <button
@@ -667,8 +760,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
               onClick={() => handleSend(chip.prompt, chip.emergency)}
               className={`text-[11px] font-medium tracking-wide px-3.5 py-1.5 rounded-xl transition whitespace-nowrap flex items-center gap-1.5 border cursor-pointer shrink-0 ${
                 chip.emergency
-                  ? 'bg-red-50 hover:bg-red-100 border-red-300 text-red-700 dark:bg-red-950/50 dark:hover:bg-red-900/60 dark:border-red-800 dark:text-red-300 font-semibold shadow-xs'
-                  : 'bg-white hover:bg-slate-100 border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 shadow-2xs'
+                  ? "bg-red-50 hover:bg-red-100 border-red-300 text-red-700 dark:bg-red-950/50 dark:hover:bg-red-900/60 dark:border-red-800 dark:text-red-300 font-semibold shadow-xs"
+                  : "bg-white hover:bg-slate-100 border-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 dark:text-slate-200 shadow-2xs"
               }`}
             >
               <span>{chip.label[language]}</span>
@@ -678,7 +771,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
         <button
           type="button"
-          onClick={() => scrollQuickQueries('right')}
+          onClick={() => scrollQuickQueries("right")}
           className="shrink-0 p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition cursor-pointer"
           title="Scroll quick queries right"
         >
@@ -694,8 +787,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
             onClick={() => setIsEmergencyMode(!isEmergencyMode)}
             className={`px-3 py-2.5 rounded-2xl border text-xs font-semibold tracking-wide transition flex items-center gap-1.5 cursor-pointer shadow-xs ${
               isEmergencyMode
-                ? 'bg-red-600 text-white border-red-600 font-bold shadow-red-600/20'
-                : 'bg-white text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white'
+                ? "bg-red-600 text-white border-red-600 font-bold shadow-red-600/20"
+                : "bg-white text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:text-slate-900 dark:hover:text-white"
             }`}
             title="Toggle Urgent Emergency Prompt Mode"
           >
@@ -708,12 +801,16 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
             onClick={handleVoiceInput}
             className={`p-2.5 rounded-2xl border transition cursor-pointer shadow-xs ${
               isListening
-                ? 'bg-red-600 text-white border-red-600 animate-bounce'
-                : 'bg-white text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:text-blue-600 dark:hover:text-blue-400'
+                ? "bg-red-600 text-white border-red-600 animate-bounce"
+                : "bg-white text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 hover:text-blue-600 dark:hover:text-blue-400"
             }`}
             title="Voice Input (Bisaya / Tagalog / English)"
           >
-            {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+            {isListening ? (
+              <MicOff className="w-4 h-4" />
+            ) : (
+              <Mic className="w-4 h-4" />
+            )}
           </button>
 
           {/* Main Input Container */}
@@ -723,13 +820,15 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              onKeyDown={(e) =>
+                e.key === "Enter" && !e.shiftKey && handleSend()
+              }
               placeholder={
-                language === 'ceb'
-                  ? 'Mangutana bahin sa DRRM sa Iligan City...'
-                  : language === 'fil'
-                  ? 'Magtanong ukol sa DRRM sa Iligan City...'
-                  : 'Ask about DRRM in Iligan City...'
+                language === "ceb"
+                  ? "Mangutana bahin sa DRRM sa Iligan City..."
+                  : language === "fil"
+                    ? "Magtanong ukol sa DRRM sa Iligan City..."
+                    : "Ask about DRRM in Iligan City..."
               }
               className="bg-transparent border-none outline-none flex-1 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
             />
@@ -746,9 +845,15 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-sans">
           <span>
-            Official DRRM Info Tool • Hotlines: <strong className="font-mono text-slate-700 dark:text-slate-300"> 221-8459 | 0997-726-2692 | 0969-233-7878</strong>
+            Official DRRM Info Tool • Hotlines:{" "}
+            <strong className="font-mono text-slate-700 dark:text-slate-300">
+              {" "}
+              221-8459 | 0997-726-2692 | 0969-233-7878
+            </strong>
           </span>
-          <span className="font-mono text-[10px] text-slate-400">Gemini 3.7 Flash</span>
+          <span className="font-mono text-[10px] text-slate-400">
+            Gemini 3.7 Flash
+          </span>
         </div>
       </div>
     </div>

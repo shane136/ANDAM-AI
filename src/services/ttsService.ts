@@ -1,53 +1,53 @@
-import { Language } from '../types';
+import { Language } from "../types";
 
 /**
  * Clean and format markdown text into natural human-spoken sentences.
  */
 export function sanitizeTextForSpeech(text: string): string {
-  if (!text) return '';
+  if (!text) return "";
 
   return (
     text
       // Convert markdown links [text](url) -> text
-      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
       // Remove URLs
-      .replace(/https?:\/\/[^\s)]+/g, '')
+      .replace(/https?:\/\/[^\s)]+/g, "")
       // Remove headers, bold, italics, code blocks, bullet markers
-      .replace(/```[\s\S]*?```/g, '')
-      .replace(/`([^`]+)`/g, '$1')
-      .replace(/^#{1,6}\s+/gm, '')
-      .replace(/\*\*([^*]+)\*\*/g, '$1')
-      .replace(/\*([^*]+)\*/g, '$1')
-      .replace(/__([^_]+)__/g, '$1')
-      .replace(/_([^_]+)_/g, '$1')
-      .replace(/~~([^~]+)~~/g, '')
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/`([^`]+)`/g, "$1")
+      .replace(/^#{1,6}\s+/gm, "")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1")
+      .replace(/_([^_]+)_/g, "$1")
+      .replace(/~~([^~]+)~~/g, "")
       // Remove HTML tags
-      .replace(/<[^>]+>/g, '')
+      .replace(/<[^>]+>/g, "")
       // Remove bullet stars, hyphens at line starts
-      .replace(/^\s*[-*+]\s+/gm, '')
+      .replace(/^\s*[-*+]\s+/gm, "")
       // Clean up common disaster agency acronyms for clearer phonetic reading
-      .replace(/\bICDRRMD\b/g, 'I C D R R M D')
-      .replace(/\bCDRRMO\b/g, 'C D R R M O')
-      .replace(/\bLGU\b/g, 'L G U')
-      .replace(/\bBFP\b/g, 'B F P')
-      .replace(/\bPNP\b/g, 'P N P')
-      .replace(/\bPCG\b/g, 'P C G')
-      .replace(/\bDOST-PAGASA\b/gi, 'DOST Pagasa')
-      .replace(/\bPAGASA\b/gi, 'Pagasa')
-      .replace(/\bDOST-PHIVOLCS\b/gi, 'DOST Phivolcs')
-      .replace(/\bPHIVOLCS\b/gi, 'Phivolcs')
-      .replace(/\bGTLMH\b/g, 'G T L M H Hospital')
-      .replace(/\bILPI\b/g, 'I L P I')
-      .replace(/\bICWS\b/g, 'I C W S')
+      .replace(/\bICDRRMD\b/g, "I C D R R M D")
+      .replace(/\bCDRRMO\b/g, "C D R R M O")
+      .replace(/\bLGU\b/g, "L G U")
+      .replace(/\bBFP\b/g, "B F P")
+      .replace(/\bPNP\b/g, "P N P")
+      .replace(/\bPCG\b/g, "P C G")
+      .replace(/\bDOST-PAGASA\b/gi, "DOST Pagasa")
+      .replace(/\bPAGASA\b/gi, "Pagasa")
+      .replace(/\bDOST-PHIVOLCS\b/gi, "DOST Phivolcs")
+      .replace(/\bPHIVOLCS\b/gi, "Phivolcs")
+      .replace(/\bGTLMH\b/g, "G T L M H Hospital")
+      .replace(/\bILPI\b/g, "I L P I")
+      .replace(/\bICWS\b/g, "I C W S")
       // Clean phone numbers: format with pauses
-      .replace(/\((\d{3})\)\s*(\d{3})-(\d{4})/g, '$1 $2 $3')
+      .replace(/\((\d{3})\)\s*(\d{3})-(\d{4})/g, "$1 $2 $3")
       // Remove common emojis and symbols
-      .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+      .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
       // Remove stray markdown symbols
-      .replace(/[#*_~|`]/g, '')
+      .replace(/[#*_~|`]/g, "")
       // Collapse repeated punctuation and whitespace
-      .replace(/\n+/g, '. ')
-      .replace(/\s+/g, ' ')
+      .replace(/\n+/g, ". ")
+      .replace(/\s+/g, " ")
       .trim()
   );
 }
@@ -64,7 +64,7 @@ export function splitIntoSentenceChunks(text: string, maxLen = 160): string[] {
   const rawSentences = text.match(sentenceRegex) || [text];
 
   const chunks: string[] = [];
-  let currentChunk = '';
+  let currentChunk = "";
 
   for (const sentence of rawSentences) {
     const trimmed = sentence.trim();
@@ -75,15 +75,15 @@ export function splitIntoSentenceChunks(text: string, maxLen = 160): string[] {
       const subPhrases = trimmed.split(/([,;:]\s+)/);
       for (const phrase of subPhrases) {
         if (!phrase.trim()) continue;
-        if ((currentChunk + ' ' + phrase).trim().length <= maxLen) {
-          currentChunk = (currentChunk + ' ' + phrase).trim();
+        if ((currentChunk + " " + phrase).trim().length <= maxLen) {
+          currentChunk = (currentChunk + " " + phrase).trim();
         } else {
           if (currentChunk) chunks.push(currentChunk);
           currentChunk = phrase.trim();
         }
       }
-    } else if ((currentChunk + ' ' + trimmed).trim().length <= maxLen) {
-      currentChunk = (currentChunk + ' ' + trimmed).trim();
+    } else if ((currentChunk + " " + trimmed).trim().length <= maxLen) {
+      currentChunk = (currentChunk + " " + trimmed).trim();
     } else {
       if (currentChunk) chunks.push(currentChunk);
       currentChunk = trimmed;
@@ -118,11 +118,11 @@ class TextToSpeechManager {
   private isSpeaking = false;
   private activeMessageId: string | null = null;
   private currentCallbacks: TTSCallbacks = {};
-  private currentLang: Language = 'ceb';
+  private currentLang: Language = "ceb";
   private hasAudioBeenUnlocked = false;
 
   constructor() {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
       this.loadVoices();
       if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = () => this.loadVoices();
@@ -131,7 +131,7 @@ class TextToSpeechManager {
   }
 
   public isSupported(): boolean {
-    return typeof window !== 'undefined' && 'speechSynthesis' in window;
+    return typeof window !== "undefined" && "speechSynthesis" in window;
   }
 
   private loadVoices() {
@@ -154,7 +154,7 @@ class TextToSpeechManager {
     if (this.hasAudioBeenUnlocked || !this.isSupported()) return;
     try {
       // Prime SpeechSynthesis with an empty utterance
-      const emptyUtterance = new SpeechSynthesisUtterance(' ');
+      const emptyUtterance = new SpeechSynthesisUtterance(" ");
       emptyUtterance.volume = 0.01;
       emptyUtterance.rate = 10;
       window.speechSynthesis.speak(emptyUtterance);
@@ -167,40 +167,52 @@ class TextToSpeechManager {
   /**
    * Select best voice for the chosen language
    */
-  private getBestVoice(language: Language): { voice: SpeechSynthesisVoice | null; langCode: string } {
+  private getBestVoice(language: Language): {
+    voice: SpeechSynthesisVoice | null;
+    langCode: string;
+  } {
     if (!this.isVoicesLoaded) {
       this.loadVoices();
     }
 
-    if (language === 'ceb' || language === 'fil') {
+    if (language === "ceb" || language === "fil") {
       // Match Tagalog / Filipino voices
       const filVoice = this.voices.find(
         (v) =>
-          v.lang.toLowerCase().startsWith('fil') ||
-          v.lang.toLowerCase().startsWith('tl') ||
-          v.name.toLowerCase().includes('filipino') ||
-          v.name.toLowerCase().includes('tagalog')
+          v.lang.toLowerCase().startsWith("fil") ||
+          v.lang.toLowerCase().startsWith("tl") ||
+          v.name.toLowerCase().includes("filipino") ||
+          v.name.toLowerCase().includes("tagalog"),
       );
       if (filVoice) return { voice: filVoice, langCode: filVoice.lang };
 
       // Fallback: Philippine English voice if available
-      const enPhVoice = this.voices.find((v) => v.lang.toLowerCase() === 'en-ph');
-      if (enPhVoice) return { voice: enPhVoice, langCode: 'en-PH' };
+      const enPhVoice = this.voices.find(
+        (v) => v.lang.toLowerCase() === "en-ph",
+      );
+      if (enPhVoice) return { voice: enPhVoice, langCode: "en-PH" };
 
-      return { voice: null, langCode: 'fil-PH' };
+      return { voice: null, langCode: "fil-PH" };
     } else {
       // English
       // Prefer broadly available English voices before Philippine English. Some
       // devices localize their en-PH voice, which can sound like a Bisaya fallback.
-      const enVoice = this.voices.find((v) =>
-        ['en-us', 'en-gb', 'en-au', 'en-ca'].includes(v.lang.toLowerCase())
-      ) || this.voices.find((v) => v.lang.toLowerCase().startsWith('en') && v.default);
+      const enVoice =
+        this.voices.find((v) =>
+          ["en-us", "en-gb", "en-au", "en-ca"].includes(v.lang.toLowerCase()),
+        ) ||
+        this.voices.find(
+          (v) => v.lang.toLowerCase().startsWith("en") && v.default,
+        );
       if (enVoice) return { voice: enVoice, langCode: enVoice.lang };
 
-      const anyEnglishVoice = this.voices.find((v) => v.lang.toLowerCase().startsWith('en'));
-      if (anyEnglishVoice) return { voice: anyEnglishVoice, langCode: anyEnglishVoice.lang };
+      const anyEnglishVoice = this.voices.find((v) =>
+        v.lang.toLowerCase().startsWith("en"),
+      );
+      if (anyEnglishVoice)
+        return { voice: anyEnglishVoice, langCode: anyEnglishVoice.lang };
 
-      return { voice: null, langCode: 'en-US' };
+      return { voice: null, langCode: "en-US" };
     }
   }
 
@@ -208,10 +220,12 @@ class TextToSpeechManager {
     messageId: string,
     rawText: string,
     language: Language,
-    callbacks: TTSCallbacks = {}
+    callbacks: TTSCallbacks = {},
   ) {
     if (!this.isSupported()) {
-      callbacks.onError?.(new Error('SpeechSynthesis is not supported in this browser.'));
+      callbacks.onError?.(
+        new Error("SpeechSynthesis is not supported in this browser."),
+      );
       return;
     }
 
@@ -268,7 +282,10 @@ class TextToSpeechManager {
     activeUtterances.push(utterance);
 
     utterance.onstart = () => {
-      this.currentCallbacks.onChunkChange?.(this.currentChunkIndex, this.currentChunks.length);
+      this.currentCallbacks.onChunkChange?.(
+        this.currentChunkIndex,
+        this.currentChunks.length,
+      );
     };
 
     utterance.onend = () => {
@@ -287,10 +304,10 @@ class TextToSpeechManager {
       if (idx !== -1) activeUtterances.splice(idx, 1);
 
       // Handle user cancellation vs actual error
-      if (e.error === 'canceled' || e.error === 'interrupted') {
+      if (e.error === "canceled" || e.error === "interrupted") {
         return;
       }
-      console.warn('TTS chunk error:', e);
+      console.warn("TTS chunk error:", e);
       this.currentChunkIndex++;
       if (this.currentChunkIndex < this.currentChunks.length) {
         this.speakCurrentChunk();
@@ -303,7 +320,7 @@ class TextToSpeechManager {
     try {
       window.speechSynthesis.speak(utterance);
     } catch (err) {
-      console.error('SpeechSynthesis speak failed:', err);
+      console.error("SpeechSynthesis speak failed:", err);
       this.cleanup();
       this.currentCallbacks.onError?.(err);
     }
@@ -316,7 +333,7 @@ class TextToSpeechManager {
       this.isPaused = true;
       this.currentCallbacks.onPause?.();
     } catch (e) {
-      console.warn('SpeechSynthesis pause error:', e);
+      console.warn("SpeechSynthesis pause error:", e);
     }
   }
 
@@ -327,7 +344,7 @@ class TextToSpeechManager {
       this.isPaused = false;
       this.currentCallbacks.onResume?.();
     } catch (e) {
-      console.warn('SpeechSynthesis resume error:', e);
+      console.warn("SpeechSynthesis resume error:", e);
       // Fallback: re-speak current chunk
       this.isPaused = false;
       this.speakCurrentChunk();
@@ -353,10 +370,10 @@ class TextToSpeechManager {
     this.currentChunkIndex = 0;
   }
 
-  public getPlaybackState(): 'idle' | 'playing' | 'paused' {
-    if (!this.isSpeaking) return 'idle';
-    if (this.isPaused) return 'paused';
-    return 'playing';
+  public getPlaybackState(): "idle" | "playing" | "paused" {
+    if (!this.isSpeaking) return "idle";
+    if (this.isPaused) return "paused";
+    return "playing";
   }
 
   public getActiveMessageId(): string | null {

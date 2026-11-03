@@ -1,9 +1,9 @@
-export type Language = 'ceb' | 'fil' | 'en';
-export type Theme = 'light' | 'dark';
+export type Language = "ceb" | "fil" | "en";
+export type Theme = "light" | "dark";
 
 export interface ChatMessage {
   id: string;
-  sender: 'user' | 'assistant';
+  sender: "user" | "assistant";
   text: string;
   timestamp: string;
   language?: Language;
@@ -19,7 +19,8 @@ export interface EmergencyContact {
   name: string;
   agency: string;
   numbers: string[];
-  category: 'rescue' | 'police' | 'fire' | 'medical' | 'utilities' | 'government';
+  category:
+    "rescue" | "police" | "fire" | "medical" | "utilities" | "government";
   address?: string;
   description?: string;
   isAvailable247?: boolean;
@@ -28,9 +29,9 @@ export interface EmergencyContact {
 export interface BarangayInfo {
   id: string;
   name: string;
-  district: 'North' | 'South' | 'East' | 'West' | 'Central';
+  district: "North" | "South" | "East" | "West" | "Central";
   populationEstimate?: string;
-  hazards: ('flood' | 'flash_flood' | 'landslide' | 'storm_surge' | 'fire')[];
+  hazards: ("flood" | "flash_flood" | "landslide" | "storm_surge" | "fire")[];
   evacuationCentres?: string[];
   keyRiskNotes: {
     ceb: string;
@@ -43,7 +44,16 @@ export interface BarangayInfo {
 export interface HazardGuide {
   id: string;
   title: { ceb: string; fil: string; en: string };
-  hazardType: 'flooding' | 'flash_flood' | 'earthquake' | 'tsunami' | 'typhoon' | 'landslide' | 'storm_surge' | 'fire' | 'heatwave';
+  hazardType:
+    | "flooding"
+    | "flash_flood"
+    | "earthquake"
+    | "tsunami"
+    | "typhoon"
+    | "landslide"
+    | "storm_surge"
+    | "fire"
+    | "heatwave";
   icon: string;
   summary: { ceb: string; fil: string; en: string };
   beforeSteps: { ceb: string; fil: string; en: string }[];
@@ -54,7 +64,13 @@ export interface HazardGuide {
 
 export interface GoBagItem {
   id: string;
-  category: 'water_food' | 'first_aid' | 'tools_gear' | 'documents_cash' | 'sanitation' | 'special_needs';
+  category:
+    | "water_food"
+    | "first_aid"
+    | "tools_gear"
+    | "documents_cash"
+    | "sanitation"
+    | "special_needs";
   title: { ceb: string; fil: string; en: string };
   description?: { ceb: string; fil: string; en: string };
   checked: boolean;
@@ -77,7 +93,7 @@ export interface WeatherData {
     fil: string;
     en: string;
   };
-  pagasaSynopsis: {
+  safetyNote: {
     ceb: string;
     fil: string;
     en: string;
@@ -88,15 +104,4 @@ export interface WeatherData {
   rainChanceTonight: number;
   precipitationSum: number;
   source: string;
-}
-
-export interface AdvisoryItem {
-  id: string;
-  title: string;
-  agency: 'ILIGAN_ICDRRMD' | 'ILIGAN_CDRRMO' | 'PAGASA' | 'PHIVOLCS' | 'ILIGAN_LGU';
-  type: 'weather' | 'earthquake' | 'flood' | 'general';
-  level: 'info' | 'advisory' | 'warning' | 'critical';
-  content: string;
-  date: string;
-  link?: string;
 }

@@ -1,24 +1,74 @@
-import React, { useState } from 'react';
-import { PhoneCall, ShieldCheck, Copy, Check, Search, MapPin, AlertCircle, Clock, ExternalLink } from 'lucide-react';
-import { OFFICIAL_HOTLINES } from '../constants/iliganData';
-import { Language } from '../types';
+import React, { useState } from "react";
+import {
+  PhoneCall,
+  ShieldCheck,
+  Copy,
+  Check,
+  Search,
+  MapPin,
+  AlertCircle,
+  Clock,
+  ExternalLink,
+} from "lucide-react";
+import { OFFICIAL_HOTLINES } from "../constants/iliganData";
+import { Language } from "../types";
 
 interface EmergencyHotlinesProps {
   language: Language;
 }
 
-export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({
+  language,
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [copiedNumber, setCopiedNumber] = useState<string | null>(null);
 
   const categories = [
-    { id: 'all', label: { ceb: 'Tanan nga Hotlines', fil: 'Lahat ng Hotlines', en: 'All Hotlines' } },
-    { id: 'rescue', label: { ceb: 'ICDRRMD / Rescue', fil: 'ICDRRMD / Rescue', en: 'ICDRRMD Rescue' } },
-    { id: 'police', label: { ceb: 'Pulis (PNP)', fil: 'Pulisya (PNP)', en: 'Police (PNP)' } },
-    { id: 'fire', label: { ceb: 'BFP Fire Station', fil: 'BFP Fire Station', en: 'Fire Dept (BFP)' } },
-    { id: 'medical', label: { ceb: 'Ospital ug Red Cross', fil: 'Ospital at Red Cross', en: 'Hospitals & Medical' } },
-    { id: 'utilities', label: { ceb: 'Kuryente ug Tubig', fil: 'Kuryente at Tubig', en: 'Utilities (ILPI/Water)' } },
+    {
+      id: "all",
+      label: {
+        ceb: "Tanan nga Hotlines",
+        fil: "Lahat ng Hotlines",
+        en: "All Hotlines",
+      },
+    },
+    {
+      id: "rescue",
+      label: {
+        ceb: "ICDRRMD / Rescue",
+        fil: "ICDRRMD / Rescue",
+        en: "ICDRRMD Rescue",
+      },
+    },
+    {
+      id: "police",
+      label: { ceb: "Pulis (PNP)", fil: "Pulisya (PNP)", en: "Police (PNP)" },
+    },
+    {
+      id: "fire",
+      label: {
+        ceb: "BFP Fire Station",
+        fil: "BFP Fire Station",
+        en: "Fire Dept (BFP)",
+      },
+    },
+    {
+      id: "medical",
+      label: {
+        ceb: "Ospital ug Red Cross",
+        fil: "Ospital at Red Cross",
+        en: "Hospitals & Medical",
+      },
+    },
+    {
+      id: "utilities",
+      label: {
+        ceb: "Kuryente ug Tubig",
+        fil: "Kuryente at Tubig",
+        en: "Utilities (ILPI/Water)",
+      },
+    },
   ];
 
   const handleCopy = (num: string) => {
@@ -28,7 +78,8 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
   };
 
   const filteredHotlines = OFFICIAL_HOTLINES.filter((item) => {
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === "all" || item.category === selectedCategory;
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.agency.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -47,21 +98,23 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
               <span>Verified Iligan City Contacts</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {language === 'ceb'
-                ? 'Iligan City Emergency Hotlines'
-                : language === 'fil'
-                ? 'Iligan City Emergency Hotlines'
-                : 'Iligan City Official Emergency Hotlines'}
+              {language === "ceb"
+                ? "Iligan City Emergency Hotlines"
+                : language === "fil"
+                  ? "Iligan City Emergency Hotlines"
+                  : "Iligan City Official Emergency Hotlines"}
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm max-w-2xl leading-relaxed">
-              {language === 'ceb'
-                ? 'Tipigi kini nga mga opisyal nga numero sa imong telepono. Tawag dayon sa ICDRRMD o Rescuers panahon sa baha, linog, o sunog.'
-                : 'Keep these verified Iligan City emergency response numbers handy on your phone for immediate 1-tap dialing during disasters.'}
+              {language === "ceb"
+                ? "Tipigi kini nga mga opisyal nga numero sa imong telepono. Tawag dayon sa ICDRRMD o Rescuers panahon sa baha, linog, o sunog."
+                : "Keep these verified Iligan City emergency response numbers handy on your phone for immediate 1-tap dialing during disasters."}
             </p>
           </div>
 
           <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 rounded-3xl p-6 text-center text-slate-900 dark:text-white shadow-md min-w-[290px] w-full md:w-auto">
-            <span className="text-xs uppercase font-mono tracking-wider text-red-600 dark:text-red-400 block font-semibold">ICDRRMD 24/7 Communication Center</span>
+            <span className="text-xs uppercase font-mono tracking-wider text-red-600 dark:text-red-400 block font-semibold">
+              ICDRRMD 24/7 Communication Center
+            </span>
             <div className="text-2xl font-black font-mono my-1 tracking-wider text-red-600 dark:text-red-400">
               (063) 221-8459
             </div>
@@ -110,8 +163,8 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-4 py-2 rounded-2xl text-xs font-semibold tracking-wide transition whitespace-nowrap border cursor-pointer ${
                 selectedCategory === cat.id
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800 dark:hover:bg-slate-800'
+                  ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
+                  : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-800 dark:hover:bg-slate-800"
               }`}
             >
               {cat.label[language]}
@@ -148,7 +201,8 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
                 </span>
                 {hotline.isAvailable247 && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-900/40 font-semibold shrink-0">
-                    <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> 24/7
+                    <Clock className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />{" "}
+                    24/7
                   </span>
                 )}
               </div>
@@ -160,14 +214,18 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
 
               {/* Description */}
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 min-h-[52px] line-clamp-3 leading-relaxed">
-                {hotline.description || 'Emergency assistance, rescue operations, and public disaster coordination.'}
+                {hotline.description ||
+                  "Emergency assistance, rescue operations, and public disaster coordination."}
               </p>
 
               {/* Address / Location */}
               <div className="min-h-[38px] flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 font-sans">
                 <MapPin className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                <span className="truncate" title={hotline.address || 'Iligan City'}>
-                  {hotline.address || 'Iligan City'}
+                <span
+                  className="truncate"
+                  title={hotline.address || "Iligan City"}
+                >
+                  {hotline.address || "Iligan City"}
                 </span>
               </div>
             </div>
@@ -186,15 +244,19 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
                     key={nIdx}
                     className="flex items-center justify-between gap-2 bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs font-mono font-bold shadow-2xs hover:border-blue-400 dark:hover:border-blue-500 transition-colors"
                   >
-                    <span className="text-blue-600 dark:text-blue-400 tracking-wide">{num}</span>
+                    <span className="text-blue-600 dark:text-blue-400 tracking-wide">
+                      {num}
+                    </span>
                     <div className="flex items-center gap-1 shrink-0">
                       <a
-                        href={`tel:${num.replace(/[^0-9+]/g, '')}`}
+                        href={`tel:${num.replace(/[^0-9+]/g, "")}`}
                         className="text-blue-600 dark:text-blue-400 hover:text-white hover:bg-blue-600 dark:hover:bg-blue-600 transition p-1.5 rounded-lg cursor-pointer flex items-center gap-1 text-[11px] font-sans"
                         title={`Call ${num}`}
                       >
                         <PhoneCall className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline text-[10px] font-semibold uppercase">Call</span>
+                        <span className="hidden sm:inline text-[10px] font-semibold uppercase">
+                          Call
+                        </span>
                       </a>
                       <button
                         onClick={() => handleCopy(num)}
@@ -220,9 +282,17 @@ export const EmergencyHotlines: React.FC<EmergencyHotlinesProps> = ({ language }
       <div className="bg-blue-50/60 dark:bg-slate-900/60 border border-blue-200/80 dark:border-slate-800 rounded-3xl p-5 flex items-start gap-3.5 text-xs text-slate-800 dark:text-slate-200">
         <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
         <div>
-          <strong className="font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide block mb-1">Iligan City Public Safety Advisory:</strong>
+          <strong className="font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide block mb-1">
+            Iligan City Public Safety Advisory:
+          </strong>
           <span className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            Panahon sa grabeng baha o kalamidad, unaha ang pagtawag sa <strong className="text-slate-900 dark:text-white font-bold">ICDRRMD Communication Center ((063) 221-8459 | 0997-726-2692 | 0969-233-7878)</strong>. Siguroha nga andam ang imong ensakto nga barangay ug street address alang sa paspas nga pagtubag sa mga responders.
+            Panahon sa grabeng baha o kalamidad, unaha ang pagtawag sa{" "}
+            <strong className="text-slate-900 dark:text-white font-bold">
+              ICDRRMD Communication Center ((063) 221-8459 | 0997-726-2692 |
+              0969-233-7878)
+            </strong>
+            . Siguroha nga andam ang imong ensakto nga barangay ug street
+            address alang sa paspas nga pagtubag sa mga responders.
           </span>
         </div>
       </div>

@@ -1,25 +1,30 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { ttsService } from '../services/ttsService';
-import { Language } from '../types';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { ttsService } from "../services/ttsService";
+import { Language } from "../types";
 
-const STORAGE_KEY = 'andam_voice_output_enabled';
+const STORAGE_KEY = "andam_voice_output_enabled";
 
 export function useTextToSpeech() {
   const [isAutoVoiceEnabled, setIsAutoVoiceEnabled] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem(STORAGE_KEY) === 'true';
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(STORAGE_KEY) === "true";
   });
 
-  const [playbackState, setPlaybackState] = useState<'idle' | 'playing' | 'paused'>('idle');
+  const [playbackState, setPlaybackState] = useState<
+    "idle" | "playing" | "paused"
+  >("idle");
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
-  const [progress, setProgress] = useState<{ current: number; total: number }>({ current: 0, total: 0 });
+  const [progress, setProgress] = useState<{ current: number; total: number }>({
+    current: 0,
+    total: 0,
+  });
 
   const activeMessageIdRef = useRef<string | null>(null);
   activeMessageIdRef.current = activeMessageId;
 
   // Persist auto voice preference
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       localStorage.setItem(STORAGE_KEY, String(isAutoVoiceEnabled));
     }
   }, [isAutoVoiceEnabled]);
@@ -36,10 +41,10 @@ export function useTextToSpeech() {
     ttsService.unlockAudio();
 
     setIsAutoVoiceEnabled((prev) => {
-      const next = typeof overrideValue === 'boolean' ? overrideValue : !prev;
+      const next = typeof overrideValue === "boolean" ? overrideValue : !prev;
       if (!next) {
         ttsService.stop();
-        setPlaybackState('idle');
+        setPlaybackState("idle");
         setActiveMessageId(null);
       }
       return next;
@@ -52,60 +57,60 @@ export function useTextToSpeech() {
       ttsService.unlockAudio();
 
       setActiveMessageId(messageId);
-      setPlaybackState('playing');
+      setPlaybackState("playing");
 
       ttsService.speak(messageId, text, lang, {
         onStart: () => {
           setActiveMessageId(messageId);
-          setPlaybackState('playing');
+          setPlaybackState("playing");
         },
         onChunkChange: (current, total) => {
           setProgress({ current: current + 1, total });
         },
         onPause: () => {
-          setPlaybackState('paused');
+          setPlaybackState("paused");
         },
         onResume: () => {
-          setPlaybackState('playing');
+          setPlaybackState("playing");
         },
         onEnd: () => {
           setActiveMessageId(null);
-          setPlaybackState('idle');
+          setPlaybackState("idle");
           setProgress({ current: 0, total: 0 });
         },
         onError: () => {
           setActiveMessageId(null);
-          setPlaybackState('idle');
+          setPlaybackState("idle");
           setProgress({ current: 0, total: 0 });
         },
       });
     },
-    []
+    [],
   );
 
   const pauseAudio = useCallback(() => {
     ttsService.pause();
-    setPlaybackState('paused');
+    setPlaybackState("paused");
   }, []);
 
   const resumeAudio = useCallback(() => {
     ttsService.resume();
-    setPlaybackState('playing');
+    setPlaybackState("playing");
   }, []);
 
   const stopAudio = useCallback(() => {
     ttsService.stop();
     setActiveMessageId(null);
-    setPlaybackState('idle');
+    setPlaybackState("idle");
     setProgress({ current: 0, total: 0 });
   }, []);
 
   const togglePlayPauseMessage = useCallback(
     (messageId: string, text: string, lang: Language) => {
       if (activeMessageId === messageId) {
-        if (playbackState === 'playing') {
+        if (playbackState === "playing") {
           pauseAudio();
-        } else if (playbackState === 'paused') {
+        } else if (playbackState === "paused") {
           resumeAudio();
         } else {
           playMessage(messageId, text, lang);
@@ -114,7 +119,7 @@ export function useTextToSpeech() {
         playMessage(messageId, text, lang);
       }
     },
-    [activeMessageId, playbackState, pauseAudio, resumeAudio, playMessage]
+    [activeMessageId, playbackState, pauseAudio, resumeAudio, playMessage],
   );
 
   return {
