@@ -47,6 +47,18 @@ function localFallback(
     "tonight",
   ].some((term) => normalizedQuery.includes(term));
 
+  // Safety steps must win over everything else, even if the message also mentions weather
+  if (
+    isEmergency ||
+    ["help", "tabang", "rescue", "emergency", "hotline", "baha"].some((term) =>
+      normalizedQuery.includes(term),
+    )
+  ) {
+    return language === "ceb"
+      ? "🚨 **BALHIN DAYON SA LUWAS UG TAAS NGA DAPIT.** Ayaw paglusong sa kusog nga baha. Tawag sa **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**."
+      : "🚨 **MOVE TO A SAFE, HIGHER LOCATION NOW.** Do not enter moving floodwater. Call **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.";
+  }
+
   if (weatherQuery && weather) {
     if (language === "ceb") {
       return `**Iligan City Weather Update:**\n\n- **Temperatura:** ${weather.temperature}°C (Mabatyagan: ${weather.apparentTemperature}°C)\n- **Kahimtang:** ${weather.conditionLabel.ceb}\n- **Tsansa sa ulan karong adlawa:** ${weather.rainChanceToday}%\n- **Tsansa sa ulan karong gabii:** ${weather.rainChanceTonight}%\n\nSource: ${weather.source}`;
@@ -57,15 +69,12 @@ function localFallback(
     return `**Iligan City Weather Update:**\n\n- **Temperature:** ${weather.temperature}°C (Feels like ${weather.apparentTemperature}°C)\n- **Condition:** ${weather.conditionLabel.en}\n- **Rain chance today:** ${weather.rainChanceToday}%\n- **Rain chance tonight:** ${weather.rainChanceTonight}%\n\nSource: ${weather.source}`;
   }
 
-  if (
-    isEmergency ||
-    ["help", "tabang", "rescue", "emergency", "hotline", "baha"].some((term) =>
-      normalizedQuery.includes(term),
-    )
-  ) {
+  if (weatherQuery) {
     return language === "ceb"
-      ? "🚨 **BALHIN DAYON SA LUWAS UG TAAS NGA DAPIT.** Ayaw paglusong sa kusog nga baha. Tawag sa **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**."
-      : "🚨 **MOVE TO A SAFE, HIGHER LOCATION NOW.** Do not enter moving floodwater. Call **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.";
+      ? "Wala koy bag-ong weather data karon. Palihog susiha ang DOST-PAGASA (https://www.pagasa.dost.gov.ph/) ug ang ICDRRMD (https://www.facebook.com/drrmoiligancity)."
+      : language === "fil"
+        ? "Wala akong bagong weather data ngayon. Pakitingnan ang DOST-PAGASA (https://www.pagasa.dost.gov.ph/) at ang ICDRRMD (https://www.facebook.com/drrmoiligancity)."
+        : "I don't have current weather data right now. Please check DOST-PAGASA (https://www.pagasa.dost.gov.ph/) and ICDRRMD (https://www.facebook.com/drrmoiligancity).";
   }
 
   const barangay = ILIGAN_BARANGAYS.find(
@@ -177,8 +186,9 @@ export default {
       if (body.isEmergency)
         systemInstruction +=
           "\nACTIVE EMERGENCY: Give immediate safety steps and ICDRRMO hotlines first.";
-      if (weather)
-        systemInstruction += `\nWEATHER CONTEXT (${weather.timestamp}): ${JSON.stringify(weather)}`;
+      systemInstruction += weather
+        ? `\nWEATHER CONTEXT (${weather.timestamp}): ${JSON.stringify(weather)}\nThis is automated forecast-model data from Open-Meteo, not a DOST-PAGASA bulletin. Credit it to Open-Meteo, never present it as coming from DOST-PAGASA, and tell users to check DOST-PAGASA for official forecasts and warnings.`
+        : "\nWEATHER DATA UNAVAILABLE: You have no current weather data. Do not state or estimate current conditions, temperatures, or rain chances. Say the data is unavailable and direct users to DOST-PAGASA and ICDRRMD.";
 
       const text = await generateWithFallback(new GoogleGenAI({ apiKey }), {
         contents: messages.map((message) => ({

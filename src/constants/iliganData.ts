@@ -3,7 +3,6 @@ import {
   BarangayInfo,
   HazardGuide,
   GoBagItem,
-  AdvisoryItem,
 } from "../types";
 
 export const OFFICIAL_HOTLINES: EmergencyContact[] = [
@@ -1261,43 +1260,5 @@ export const OFFICIAL_SOURCES = [
     description:
       "National situational reports and disaster management directives.",
     tag: "NDRRMC",
-  },
-];
-
-export const SAMPLE_ADVISORIES: AdvisoryItem[] = [
-  {
-    id: "adv-1",
-    title:
-      "ICDRRMD Weather Alert: Localized Thunderstorms over Lanao del Norte",
-    agency: "PAGASA",
-    type: "weather",
-    level: "advisory",
-    content:
-      "DOST-PAGASA issues Thunderstorm Advisory. Expect moderate to heavy rainfall with lightning and strong winds over Iligan City within the next 1-2 hours. Low-lying areas near riverbanks are advised to monitor water levels.",
-    date: "2026-08-13 09:30 AM",
-    link: "https://www.pagasa.dost.gov.ph/",
-  },
-  {
-    id: "adv-2",
-    title: "PHIVOLCS Bulletin: Regional Seismic Status Monitoring",
-    agency: "PHIVOLCS",
-    type: "earthquake",
-    level: "info",
-    content:
-      "DOST-PHIVOLCS reports normal background seismic monitoring in Northern Mindanao. No active tsunami threats for Iligan Bay coastal zones.",
-    date: "2026-08-13 08:00 AM",
-    link: "https://www.phivolcs.dost.gov.ph/",
-  },
-  {
-    id: "adv-3",
-    title:
-      "Iligan ICDRRMD Reminder: Family Emergency Preparedness & 24/7 Hotlines",
-    agency: "ILIGAN_ICDRRMD",
-    type: "general",
-    level: "info",
-    content:
-      "All 44 barangays of Iligan City are encouraged to review their local evacuation plans and inspect household Go-Bags. For 24/7 emergency response, contact ICDRRMD Communication Center: (063) 221-8459, 0997-726-2692 (Globe), 0969-233-7878 (Smart). Official updates at facebook.com/drrmoiligancity.",
-    date: "2026-08-13 02:00 PM",
-    link: "https://www.facebook.com/drrmoiligancity",
   },
 ];

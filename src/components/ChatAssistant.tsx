@@ -161,12 +161,11 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     },
     {
       label: {
-        ceb: "⛅ Weather Today / Tonight (DOST-PAGASA)",
-        fil: "⛅ Panahon Ngayon at Mamayang Gabi (PAGASA)",
-        en: "⛅ Weather Today & Tonight (DOST-PAGASA)",
+        ceb: "⛅ Weather Today / Tonight",
+        fil: "⛅ Panahon Ngayon at Mamayang Gabi",
+        en: "⛅ Weather Today & Tonight",
       },
-      prompt:
-        "What is the weather today or tonight in Iligan City according to DOST-PAGASA?",
+      prompt: "What is the weather today or tonight in Iligan City?",
       emergency: false,
     },
     {
@@ -428,7 +427,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none my-1 min-h-[620px] transition-colors">
+    <div className="w-full flex-1 flex flex-col bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl overflow-hidden shadow-lg shadow-slate-200/50 dark:shadow-none my-1 min-h-[390px] transition-colors">
       {/* Top Controls Bar */}
       <div className="bg-slate-50/90 dark:bg-slate-950/80 px-4 md:px-6 py-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
         {/* Barangay Selector */}
@@ -578,7 +577,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       )}
 
       {/* Messages Scroll View */}
-      <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-950/40 min-h-[380px] transition-colors">
+      <div className="flex-1 p-4 md:p-6 overflow-y-auto space-y-6 bg-slate-50/50 dark:bg-slate-950/40 min-h-0 transition-colors">
         {messages.map((msg) => {
           const isUser = msg.sender === "user";
           const isCurrentSpeaking =
@@ -727,7 +726,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
           <div className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 p-4 rounded-2xl max-w-md shadow-xs">
             <RefreshCw className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
             <div className="text-xs font-mono uppercase tracking-wider font-semibold">
-              Retrieving verified data from CDRRMO, PAGASA & PHIVOLCS...
+              Preparing your answer...
             </div>
           </div>
         )}

@@ -31,13 +31,18 @@ export default function App() {
     localStorage.setItem("iligan_drrm_theme", theme);
   }, [theme]);
 
+  // The chat fills the screen and scrolls its messages; other tabs scroll the page
+  const isChatTab = activeTab === "chat";
+
   const handleAskChatbotAboutBarangay = (bName: string) => {
     setSelectedBarangay(bName);
     setActiveTab("chat");
   };
 
   return (
-    <div className="min-h-screen bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200 antialiased">
+    <div
+      className={`${isChatTab ? "h-dvh overflow-y-auto" : "min-h-screen"} bg-slate-100/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white transition-colors duration-200 antialiased`}
+    >
       {/* Top Navigation Header */}
       <Header
         activeTab={activeTab}
@@ -50,7 +55,9 @@ export default function App() {
       />
 
       {/* Main Content Viewport */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 flex flex-col">
+      <main
+        className={`flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 py-6 flex flex-col ${isChatTab ? "min-h-0 max-md:py-2 [@media(max-height:700px)]:py-2" : ""}`}
+      >
         {activeTab === "chat" && (
           <ChatAssistant
             language={language}
@@ -80,7 +87,9 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 py-4 px-4 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors">
+      <footer
+        className={`${isChatTab ? "max-md:hidden [@media(max-height:700px)]:hidden" : ""} bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 py-4 px-4 text-center text-xs font-sans text-slate-500 dark:text-slate-400 transition-colors`}
+      >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
