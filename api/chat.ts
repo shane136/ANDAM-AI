@@ -1,6 +1,10 @@
 import { GoogleGenAI } from "@google/genai";
 import { ILIGAN_DRRM_SYSTEM_INSTRUCTION } from "../src/constants/systemInstruction.js";
-import { ILIGAN_BARANGAYS } from "../src/constants/iliganData.js";
+import {
+  HAZARD_GUIDES,
+  ILIGAN_BARANGAYS,
+  OFFICIAL_HOTLINES,
+} from "../src/constants/iliganData.js";
 import { fetchIliganRealtimeWeather } from "../src/services/weatherService.js";
 
 type Language = "ceb" | "fil" | "en";
@@ -29,6 +33,112 @@ const SOURCES = [
   { name: "DOST-PHIVOLCS", url: "https://www.phivolcs.dost.gov.ph/" },
 ];
 
+type LocalizedText = Record<Language, string>;
+
+function guideSteps(guideId: string): LocalizedText[] {
+  return HAZARD_GUIDES.find((guide) => guide.id === guideId)?.duringSteps ?? [];
+}
+
+// Steps come from the hazard guides where one exists, so this can't drift from the Guides tab.
+// Matching is on whole words: "bahay" (house) must not count as "baha" (flood).
+const EMERGENCY_HAZARDS: {
+  pattern: RegExp;
+  label: LocalizedText;
+  steps: LocalizedText[];
+  callFireStation?: boolean;
+}[] = [
+  {
+    pattern: /earthquake|quake|tremor|linog|lindol/,
+    label: { ceb: "LINOG", fil: "LINDOL", en: "EARTHQUAKE" },
+    steps: guideSteps("h-earthquake"),
+  },
+  {
+    pattern: /tsunami/,
+    label: { ceb: "TSUNAMI", fil: "TSUNAMI", en: "TSUNAMI" },
+    steps: [
+      {
+        ceb: "Biya dayon sa baybayon ug adto sa taas nga dapit o layo sa dagat.",
+        fil: "Umalis agad sa baybayin at pumunta sa mataas na lugar o malayo sa dagat.",
+        en: "Leave the shore now and go to high ground or as far inland as you can.",
+      },
+      {
+        ceb: "Ayaw na paghulat og pahibalo kung kusog ang linog o kalit nga mihubas ang dagat.",
+        fil: "Huwag nang hintayin ang babala kung malakas ang lindol o biglang umurong ang dagat.",
+        en: "Do not wait for a warning if the shaking was strong or the sea suddenly pulls back.",
+      },
+    ],
+  },
+  {
+    pattern: /\b(?:wild)?fires?\b|\bsmoke\b|\bburning\b|sunog|\bkalayo\b/,
+    label: { ceb: "SUNOG", fil: "SUNOG", en: "FIRE" },
+    steps: [
+      {
+        ceb: "Gawas dayon sa building ug ayaw na pagbalik para sa mga gamit.",
+        fil: "Lumabas agad ng gusali at huwag nang bumalik para sa mga gamit.",
+        en: "Get out of the building now and do not go back for belongings.",
+      },
+      {
+        ceb: "Kung naay aso, pagpaubos ug taboni ang ilong ug baba.",
+        fil: "Kung may usok, yumuko at takpan ang ilong at bibig.",
+        en: "If there is smoke, stay low and cover your nose and mouth.",
+      },
+    ],
+    callFireStation: true,
+  },
+  {
+    pattern: /landslide|mudslide|dahili|guho ng lupa/,
+    label: { ceb: "PAGDAHILI SA YUTA", fil: "PAGGUHO NG LUPA", en: "LANDSLIDE" },
+    steps: guideSteps("h-landslide"),
+  },
+  {
+    pattern:
+      /\bflood|storm surge|daluyong|\b(?:baha|bahaan|nagbaha|nagbabaha|mibaha|mobaha|gibaha|pagbaha|pagbabaha|binaha|binabaha|bumaha|bumabaha|babaha)\b/,
+    label: { ceb: "BAHA", fil: "BAHA", en: "FLOOD" },
+    steps: guideSteps("h-flood"),
+  },
+  {
+    pattern: /typhoon|cyclone|bagyo|\bstorm\b(?! surge)/,
+    label: { ceb: "BAGYO", fil: "BAGYO", en: "TYPHOON" },
+    steps: guideSteps("h-typhoon"),
+  },
+];
+
+const UNKNOWN_EMERGENCY_REPLY: LocalizedText = {
+  ceb: "🚨 **PALAYO SA PELIGRO KUNG LUWAS KANG MOLIHOK.** Pangayo dayon og tabang. Isulti ang imong barangay, unsay nahitabo, ug kung naay naangol o natanggong.",
+  fil: "🚨 **LUMAYO SA PANGANIB KUNG LIGTAS KANG GUMALAW.** Humingi agad ng tulong. Sabihin ang iyong barangay, ang nangyari, at kung may nasaktan o na-trap.",
+  en: "🚨 **GET AWAY FROM DANGER IF IT IS SAFE TO MOVE.** Call for help now. Say your barangay, what happened, and if anyone is hurt or trapped.",
+};
+
+const CALL_LABEL: LocalizedText = { ceb: "Tawag sa", fil: "Tumawag sa", en: "Call" };
+
+function hotlineLine(contactId: string, label: string, language: Language) {
+  const contact = OFFICIAL_HOTLINES.find((item) => item.id === contactId);
+  if (!contact) return "";
+  return `${CALL_LABEL[language]} **${label}: ${contact.numbers.slice(0, 3).join(" / ")}**.`;
+}
+
+function emergencyReply(normalizedQuery: string, language: Language) {
+  const hazards = EMERGENCY_HAZARDS.filter((hazard) =>
+    hazard.pattern.test(normalizedQuery),
+  );
+  const rescueLine = hotlineLine("cdrmmo-1", "ICDRRMD", language);
+
+  // Without a known hazard, don't guess one: the right move depends on what's happening
+  if (hazards.length === 0) {
+    return `${UNKNOWN_EMERGENCY_REPLY[language]}\n\n${rescueLine}`;
+  }
+
+  const sections = hazards.map((hazard) => {
+    const steps = hazard.steps.map((step) => `- ${step[language]}`).join("\n");
+    return `🚨 **${hazard.label[language]}:**\n\n${steps}`;
+  });
+  const fireLine = hazards.some((hazard) => hazard.callFireStation)
+    ? hotlineLine("bfp-iligan", "BFP", language)
+    : "";
+
+  return [...sections, fireLine, rescueLine].filter(Boolean).join("\n\n");
+}
+
 function localFallback(
   query: string,
   language: Language = "ceb",
@@ -54,9 +164,7 @@ function localFallback(
       normalizedQuery.includes(term),
     )
   ) {
-    return language === "ceb"
-      ? "🚨 **BALHIN DAYON SA LUWAS UG TAAS NGA DAPIT.** Ayaw paglusong sa kusog nga baha. Tawag sa **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**."
-      : "🚨 **MOVE TO A SAFE, HIGHER LOCATION NOW.** Do not enter moving floodwater. Call **ICDRRMO: (063) 221-8459 / 0997-726-2692 / 0969-233-7878**.";
+    return emergencyReply(normalizedQuery, language);
   }
 
   if (weatherQuery && weather) {
